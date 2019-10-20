@@ -21,6 +21,7 @@ poly*poly
 ```
 
 ### PolyPieceFunc
+```python
 from PolyPieces import PolyPiece, PolyPieceFunc
 
 uniformRandomDensity = PolyPieceFunc([PolyPiece([0,1], UniVarPoly(1))])
@@ -29,6 +30,7 @@ uniformRandomDensitySum2 = uniformRandomDensity.conv(uniformRandomDensity)
 print(uniformRandomDensitySum2)
 uniformRandomDensitySum3 = uniformRandomDensitySum2.conv(uniformRandomDensity)
 print(uniformRandomDensitySum2)
+```
 
 ## Tests
 See the doctests in the implementation files.

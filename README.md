@@ -29,24 +29,30 @@ Basic usage. For more elaborate examples see the files in `examples/`.
 >>> print(uniformRandomDensity)
 ```
 ```
+f(x) =
   1, x in [0,1]
+  0, else
 ```
 ```python
 >>> uniformRandomDensitySum2 = uniformRandomDensity.conv(uniformRandomDensity)
 >>> print(uniformRandomDensitySum2)
 ```
 ```
+f(x) =
   x, x in [0,1]
   -x + 2, x in [1,2]
+  0, else
 ```
 ```python
 >>> uniformRandomDensitySum3 = uniformRandomDensitySum2.conv(uniformRandomDensity)
 >>> print(uniformRandomDensitySum2)
 ```
 ```
+f(x) =
   0.5x^2, x in [0,1]
   -x^2 + 3x - 1.5, x in [1,2]
   0.5x^2 - 3x + 4.5, x in [2,3]
+  0, else
 ```
 
 ## Tests

@@ -7,9 +7,9 @@ from UniVarPoly import UniVarPoly
 
 class PolyPiece:
 	'''polynomial over interval'''
-	def __init__(self, interval, UniVarPoly):
+	def __init__(self, interval, poly):
 		self.interval = interval
-		self.poly = UniVarPoly
+		self.poly = poly if isinstance(poly, UniVarPoly) else UniVarPoly(poly)
 
 
 	def conv(self, pp):
@@ -86,7 +86,16 @@ class PolyPiece:
 class PolyPieceFunc:
 	'''piecewise polynomial function'''
 	def __init__(self, polyPieces=None):
-		self.polyPieces = polyPieces if polyPieces is not None else []
+		if polyPieces is None:
+			self.polyPieces = []
+		elif isinstance(polyPieces, PolyPiece):
+			self.polyPieces = [polyPieces]
+		elif isinstance(polyPieces, list) and all([isinstance(pp, PolyPiece) for pp in polyPieces]):
+			self.polyPieces = polyPieces
+		else:
+			argType = str(type(polyPieces))
+			if type(polyPieces) == list: argType = 'list(%s)' % type(polyPieces[0])
+			raise ValueError("unsupported argument type \"%s\"" % argType) 
 		if not self._isConsistent():
 			raise ValueError("invalid poly pieces")
 
@@ -112,7 +121,7 @@ class PolyPieceFunc:
 
 	def _isContinuous(self, prec=1e-10, printFailReason=False):
 		'''check if piecewise function is continuous.
-		
+		y
 		   >>> fpp = PolyPieceFunc()
 		   >>> fpp._isContinuous()
 		   True

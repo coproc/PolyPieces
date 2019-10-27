@@ -427,9 +427,16 @@ class PolyPieceFunc:
 		self.polyPieces = (self ^ fpp).polyPieces
 		return self
 		
-		
+
+	@staticmethod
+	def _align(key, strings):
+		keyPos = max([s.find(key) for s in strings])
+		return [((keyPos-len(s1))*' ' + key).join([s1,s2]) for s1,s2 in [s.split(key) for s in strings]]
+
+
 	def __str__(self):
 		pieceReprs = [str(pp) for pp in self.polyPieces]
+		pieceReprs = PolyPieceFunc._align('x in', pieceReprs)
 		indent = '  '
 		return 'f(x) =\n' + indent + ('\n'+indent).join(pieceReprs) + '\n' + indent + '0, else'
 

@@ -431,7 +431,7 @@ class PolyPieceFunc:
 	def __str__(self):
 		pieceReprs = [str(pp) for pp in self.polyPieces]
 		indent = '  '
-		return indent + ('\n'+indent).join(pieceReprs)
+		return 'f(x) =\n' + indent + ('\n'+indent).join(pieceReprs) + '\n' + indent + '0, else'
 
 
 if __name__ == "__main__":

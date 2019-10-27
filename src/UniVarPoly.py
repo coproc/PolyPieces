@@ -3,6 +3,7 @@
 from __future__ import division
 import copy
 import numbers
+from fractions import Fraction
 
 
 class UniVarPoly:
@@ -411,6 +412,7 @@ class UniVarPoly:
 		   >>> UniVarPoly._coeffRepr(0.999, 2)
 		   '1'
 		'''
+		if isinstance(c, Fraction): return str(c)
 		cFormat = '%f' if prec is None else ('%%.%df' % prec)
 		cRepr = cFormat % c
 		if '.' in cRepr:

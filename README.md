@@ -2,10 +2,20 @@
 
 Basic arithmetic with univariate polynomials und piecewise polynomial functions.
 
+The main intent of this library is to compute the convolution of piecewise polynomial functions
+for getting the density functions of sums of random variables.
+
+The coefficient domain used for computing with the polynomials is defined by the types of the coefficients 
+of the input polynomials. 
+If the original coefficients are integers, the computations will be carried out with integers as long
+as no divisions occur.
+If the original coefficients are fractions (`fractions.Fraction`), the computations will be carried out
+with full precision and printed with fractions.
+
+
 ## Installation
 
 Simply copy the files from `src/`.
-
 
 
 ## Examples

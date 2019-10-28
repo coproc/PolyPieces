@@ -7,9 +7,9 @@ from UniVarPoly import UniVarPoly
 
 class PolyPiece:
 	'''polynomial over interval'''
-	def __init__(self, interval, poly):
-		self.interval = interval
+	def __init__(self, poly, interval):
 		self.poly = poly if isinstance(poly, UniVarPoly) else UniVarPoly(poly)
+		self.interval = interval
 
 
 	def conv(self, pp):
@@ -57,7 +57,7 @@ class PolyPiece:
 		p2_dk = pp.poly
 		if p2_dk == 0: return PolyPieceFunc()
 		p1int_k = self.poly.int()
-		ppl_conv = [PolyPiece(xLimits[i:i+2], UniVarPoly()) for i in range(len(tIntervals))]
+		ppl_conv = [PolyPiece(UniVarPoly(), xLimits[i:i+2]) for i in range(len(tIntervals))]
 		while True:
 			for j,tLimits in enumerate(tIntervals):
 				for i,t in enumerate(tLimits):
@@ -125,16 +125,16 @@ class PolyPieceFunc:
 		   >>> fpp = PolyPieceFunc()
 		   >>> fpp._isContinuous()
 		   True
-		   >>> fpp1 = PolyPieceFunc([PolyPiece([0,1],UniVarPoly(1))])
+		   >>> fpp1 = PolyPieceFunc([PolyPiece(1, [0,1])])
 		   >>> fpp1._isContinuous()
 		   False
-		   >>> fpp2 = PolyPieceFunc([PolyPiece([0,1],UniVarPoly([0,1])),PolyPiece([1,2],UniVarPoly([2,-1]))])
+		   >>> fpp2 = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]),[0,1]), PolyPiece(UniVarPoly([2,-1]),[1,2])])
 		   >>> fpp2._isContinuous()
 		   True
 		'''
 		assert(self._isConsistent(printFailReason=printFailReason))
 		if len(self.polyPieces) == 0: return True
-		ppPrev = PolyPiece([-float('inf'),self.polyPieces[0].interval[0]], UniVarPoly())
+		ppPrev = PolyPiece(UniVarPoly(), [-float('inf'),self.polyPieces[0].interval[0]])
 		for i,pp in enumerate(self.polyPieces):
 			x0 = pp.interval[0]
 			valPrev = ppPrev.poly.eval(x0) if abs(x0 - ppPrev.interval[1]) < prec else 0
@@ -150,8 +150,8 @@ class PolyPieceFunc:
 	def _selectPP(self, x0, idxStart=0):
 		'''return (first) polynomial piece containing x0 in its definition range
 		
-		   >>> pp1 = PolyPiece([-1,1], UniVarPoly([0,1]))
-		   >>> pp2 = PolyPiece([ 1,2], UniVarPoly([0,2]))
+		   >>> pp1 = PolyPiece(UniVarPoly([0,1]), [-1,1])
+		   >>> pp2 = PolyPiece(UniVarPoly([0,2]), [ 1,2])
 		   >>> fpp = PolyPieceFunc([pp1, pp2])
 		   >>> fpp._isConsistent()
 		   True
@@ -178,8 +178,8 @@ class PolyPieceFunc:
 	def eval(self, x0):
 		'''evaluate at x=x0
 		
-		   >>> pp1 = PolyPiece([-1,1], UniVarPoly([0,1]))
-		   >>> pp2 = PolyPiece([ 1,2], UniVarPoly([0,2]))
+		   >>> pp1 = PolyPiece(UniVarPoly([0,1]), [-1,1])
+		   >>> pp2 = PolyPiece(UniVarPoly([0,2]), [ 1,2])
 		   >>> fpp = PolyPieceFunc([pp1, pp2])
 		   >>> fpp.eval(-2)
 		   0
@@ -204,7 +204,7 @@ class PolyPieceFunc:
 		'''compute polynomial composition self o poly.
 		   Only implemented for numbers and linear polynomials.
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece([0,1], UniVarPoly(1))])
+		   >>> fpp = PolyPieceFunc([PolyPiece(1, [0,1])])
 		   >>> p1 = UniVarPoly([-1,1])
 		   >>> fpp2 = fpp.comp(p1)
 		   >>> x0Vals = [-1, -0.5, 0, 0.5, 1, 1.5, 2]
@@ -224,7 +224,7 @@ class PolyPieceFunc:
 		fppComp = PolyPieceFunc()
 		for pp in self.polyPieces:
 			a,b = pp.interval
-			fppComp.polyPieces.append(PolyPiece([(a-d)/k,(b-d)/k], pp.poly.comp(p)))
+			fppComp.polyPieces.append(PolyPiece(pp.poly.comp(p), [(a-d)/k,(b-d)/k]))
 			
 		return fppComp
 
@@ -254,18 +254,22 @@ class PolyPieceFunc:
 				p2,i2 = op2._selectPP(x, i2)
 			else:
 				p2 = op2
-			ppl_res.append(PolyPiece([xi,xi_1], opFunc(p1,p2)))
+			ppl_res.append(PolyPiece(opFunc(p1,p2), [xi,xi_1]))
 		return PolyPieceFunc(ppl_res)
 
 
 	def __add__(self, op2):
 		'''overload operator +
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece([0,1], UniVarPoly([0,1]))])
+		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
 		   >>> print(fpp + 1)
+		   f(x) =
 		     x + 1, x in [0,1]
+		     0, else
 		   >>> print(fpp + fpp)
+		   f(x) =
 		     2x, x in [0,1]
+		     0, else
 		'''
 		return self._binArithOp(op2, lambda x,y: x+y)
 
@@ -286,9 +290,11 @@ class PolyPieceFunc:
 	def __pos__(self):
 		'''overload unary operator +
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece([0,1], UniVarPoly([0,1]))])
+		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
 		   >>> print(+fpp)
+		   f(x) =
 		     x, x in [0,1]
+		     0, else
 		'''
 		return 1*self
 
@@ -296,9 +302,11 @@ class PolyPieceFunc:
 	def __neg__(self):
 		'''overload unary operator -
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece([0,1], UniVarPoly([0,1]))])
+		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
 		   >>> print(-fpp)
+		   f(x) =
 		     -x, x in [0,1]
+		     0, else
 		'''
 		return (-1)*self
 
@@ -306,11 +314,15 @@ class PolyPieceFunc:
 	def __sub__(self, op2):
 		'''overload operator -
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece([0,1], UniVarPoly([0,1]))])
+		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
 		   >>> print(fpp - 1)
+		   f(x) =
 		     x - 1, x in [0,1]
+		     0, else
 		   >>> print(2*fpp - fpp)
+		   f(x) =
 		     x, x in [0,1]
+		     0, else
 		'''
 		return self._binArithOp(op2, lambda x,y: x-y)
 
@@ -325,9 +337,11 @@ class PolyPieceFunc:
 	def __rsub__(self, op1):
 		'''overload operator + for right hand side
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece([0,1], UniVarPoly([0,1]))])
+		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
 		   >>> print(1 - fpp)
+		   f(x) =
 		     -x + 1, x in [0,1]
+		     0, else
 		'''
 		return -(self.__sub__(op1))
 
@@ -335,11 +349,15 @@ class PolyPieceFunc:
 	def __mul__(self, op2):
 		'''overload operator *
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece([0,1], UniVarPoly([0,1]))])
+		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
 		   >>> print(fpp * 2)
+		   f(x) =
 		     2x, x in [0,1]
+		     0, else
 		   >>> print(fpp * fpp)
+		   f(x) =
 		     x^2, x in [0,1]
+		     0, else
 		'''
 		return self._binArithOp(op2, lambda x,y: x*y)
 
@@ -364,9 +382,9 @@ class PolyPieceFunc:
 		   >>> p_x2 = UniVarPoly([0,0,1])
 		   >>> p_x_2 = UniVarPoly([2,1])
 		   >>> p_x__2 = UniVarPoly([-2,1])
-		   >>> fpp = PolyPieceFunc([PolyPiece([-2,-1], p_x2.comp(p_x_2)), 
-		   ...                      PolyPiece([-1, 1], 2*p_1 - p_x2), 
-		   ...                      PolyPiece([ 1, 2], p_x2.comp(p_x__2))]) 
+		   >>> fpp = PolyPieceFunc([PolyPiece(p_x2.comp(p_x_2),  [-2,-1]), 
+		   ...                      PolyPiece(2*p_1 - p_x2,      [-1, 1]), 
+		   ...                      PolyPiece(p_x2.comp(p_x__2), [ 1, 2])]) 
 		   >>> fppDer = fpp.der()
 		   >>> fppDer._isContinuous()
 		   True
@@ -378,7 +396,7 @@ class PolyPieceFunc:
 		# derivative of constant polynomial is the zero polynomial
 		fDer = PolyPieceFunc()
 		for pp in self.polyPieces:
-			fDer.polyPieces.append(PolyPiece(pp.interval, pp.poly.der()))
+			fDer.polyPieces.append(PolyPiece(pp.poly.der(), pp.interval))
 		return fDer
 
 
@@ -388,10 +406,10 @@ class PolyPieceFunc:
 		   >>> fpp = PolyPieceFunc()
 		   >>> fpp.int()
 		   0
-		   >>> fpp1 = PolyPieceFunc([PolyPiece([0,1],UniVarPoly(1))])
+		   >>> fpp1 = PolyPieceFunc([PolyPiece(1, [0,1])])
 		   >>> fpp1.int()
 		   1
-		   >>> fpp2 = PolyPieceFunc([PolyPiece([0,1],UniVarPoly([0,1])),PolyPiece([1,2],UniVarPoly([2,-1]))])
+		   >>> fpp2 = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]),[0,1]), PolyPiece(UniVarPoly([2,-1]),[1,2])])
 		   >>> fpp2.int([-1,3])
 		   1.0
 		   >>> fpp2.int([0.5,3])

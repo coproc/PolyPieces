@@ -25,7 +25,7 @@ Basic usage. For more elaborate examples see the files in `examples/`.
 ```python
 >>> from PolyPieces import PolyPiece, PolyPieceFunc
 
->>> uniformRandomDensity = PolyPieceFunc([PolyPiece([0,1], UniVarPoly(1))])
+>>> uniformRandomDensity = PolyPieceFunc(PolyPiece(1, [0,1]))
 >>> print(uniformRandomDensity)
 ```
 ```
@@ -45,7 +45,7 @@ f(x) =
 ```
 ```python
 >>> uniformRandomDensitySum3 = uniformRandomDensitySum2.conv(uniformRandomDensity)
->>> print(uniformRandomDensitySum2)
+>>> print(uniformRandomDensitySum3)
 ```
 ```
 f(x) =

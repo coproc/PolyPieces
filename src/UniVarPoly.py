@@ -280,7 +280,7 @@ class UniVarPoly:
 		elif isinstance(poly, UniVarPoly):
 			coeffs = poly.coeffs
 		else:
-			return NotImplemented # ValueError("unexpected argument type '%s'" % type(poly))
+			return NotImplemented
 		return UniVarPoly(self._mulCoeffs(coeffs))
 
 
@@ -322,6 +322,34 @@ class UniVarPoly:
 		   [0, 2]
 		'''
 		return self.__mul__(poly)
+
+
+	def __truediv__(self, d):
+		'''overload operator /
+		   (divisor must be number, polynomial division not implemented)
+		
+		   >>> p1 = UniVarPoly([-1,2])
+		   >>> p = p1 / 5
+		   >>> p.coeffs
+		   [-0.2, 0.4]
+		'''
+		if isinstance(d, numbers.Number):
+			return self.scaled(1/d)
+		else:
+			return NotImplemented
+
+
+	def __idiv__(self, d):
+		'''overload operator /=
+		   (divisor must be number, polynomial division not implemented)
+		
+		   >>> p = UniVarPoly([-1,1])
+		   >>> p /= 2
+		   >>> p.coeffs
+		   [-0.5, 0.5]
+		'''
+		self.imul(1/d)
+		return self
 
 
 	def comp(self, poly):

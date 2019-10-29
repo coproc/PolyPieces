@@ -375,6 +375,38 @@ class PolyPieceFunc:
 		return self.__mul__(op1)
 
 
+	def __truediv__(self, op2):
+		'''overload operator /
+		   (divisor must be number)
+		
+		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> print(fpp / 2)
+		   f(x) =
+		     0.5x, x in [0,1]
+		     0, else
+		'''
+		if isinstance(op2, numbers.Number):
+			return self._binArithOp(op2, lambda x,y: x/y)
+		else:
+			return NotImplemented
+
+
+	def __idiv__(self, op2):
+		'''overload operator /=
+		   (divisor must be number)
+		
+		   >>> p = UniVarPoly([-1,1])
+		   >>> p /= 2
+		   >>> p.coeffs
+		   [-0.5, 0.5]
+		'''
+		if not isinstance(op2, numbers.Number):
+			raise ValueError("divisor of invalid type '%s' (must be number)" % type(op2))
+		for pp in self.polyPieces:
+			pp /= op2
+		return self
+
+
 	def der(self):
 		'''derivative function
 		

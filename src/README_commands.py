@@ -9,6 +9,7 @@ print(uniformDensity)
 # compute density of the sum of two uniformly distributed random variables (by convolution)
 uniformDensitySum2 = uniformDensity.conv(uniformDensity)
 print(uniformDensitySum2)
-# compute density of the sum of three uniformly distributed random variables
-uniformDensitySum3 = uniformDensitySum2.conv(uniformDensity)
-print(uniformDensitySum3)
+from fractions import Fraction
+poly_rat = Fraction(5)*x - Fraction(1,4)
+print(poly_rat)
+print(poly_rat.int())

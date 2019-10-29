@@ -1,7 +1,5 @@
 # PolyPieces README
 
-Basic arithmetic with univariate polynomials und piecewise polynomial functions.
-
 The main intent of this library is to compute the convolution of piecewise polynomial functions
 for getting the density functions of sums of random variables.
 
@@ -10,7 +8,7 @@ of the input polynomials.
 If the original coefficients are integers, the computations will be carried out with integers as long
 as no divisions occur.
 If the original coefficients are fractions (`fractions.Fraction`), the computations will be carried out
-with full precision and printed with fractions.
+with exact arithmetic and printed with fractions.
 
 
 ## Installation

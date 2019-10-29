@@ -17,7 +17,6 @@ def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True):
 	xVals = [xRange[0]+i*dx for i in range(xRes+1)]
 	yVals = [f(x) for x in xVals]
 	yMin,yMax = (min(yVals),max(yVals)) if yRange is None else yRange
-	print(yMin,yMax)
 	dy = (yMax-yMin)/(yRes-1)
 	plotArea = [len(xVals)*' ' for _ in range(yRes+1)]
 	for xIdx,y in enumerate(yVals):

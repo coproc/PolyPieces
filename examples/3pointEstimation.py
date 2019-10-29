@@ -5,7 +5,7 @@ sys.path.append('../src')
 
 from UniVarPoly import UniVarPoly, p_x as x
 from PolyPieces import PolyPiece, PolyPieceFunc
-
+import AsciiPlot
 
 # generate density function of triangular distribution
 def triangDistDensity(a,b,c):
@@ -14,35 +14,15 @@ def triangDistDensity(a,b,c):
 	return PolyPieceFunc([pp1,pp2])*2/(b-a)
 
 
-PLOT_DOTS = ('\N{COMBINING DOT BELOW}', '.', '\N{MIDDLE DOT}', '\N{DOT ABOVE}')
-# print((len(PLOT_DOTS)+1)*' '+PLOT_DOTS[0])
-# print('_'+''.join(PLOT_DOTS)+'+')
-# print(PLOT_DOTS[-1])
-
-def asciiPlot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True):
-	dx = (xRange[1]-xRange[0])/xRes
-	xVals = [xRange[0]+i*dx for i in range(xRes+1)]
-	yVals = [f(x) for x in xVals]
-	yMin,yMax = (min(yVals),max(yVals)) if yRange is None else yRange
-	print(yMin,yMax)
-	dy = (yMax-yMin)/(yRes-1)
-	plotArea = [len(xVals)*' ' for _ in range(yRes+1)]
-	for xIdx,y in enumerate(yVals):
-		yScaled = (yMax-y)/dy+0.4
-		yIdx = int(yScaled)
-		line = plotArea[yIdx]
-		dotChar = PLOT_DOTS[3-int(3.98*(yScaled-yIdx)+0.01)] if unicodeOutput else '.'
-		plotArea[yIdx] = line[0:xIdx] + dotChar + line[xIdx+1:]
-	return '\n'.join(plotArea)
-
+# generate ascii plot (as string) for piecewise polynomial function
 def plotFpp(fpp, xRange=None, yRange=None, xRes=80, yRes=20, unicodeOutput=True):
 	polyPieces = fpp.polyPieces
 	if xRange is None: xRange = [polyPieces[0].interval[0],polyPieces[-1].interval[1]]
-	return asciiPlot(lambda x: fpp.eval(x), xRange, yRange, xRes, yRes, unicodeOutput)
+	return AsciiPlot.plot(lambda x: fpp.eval(x), xRange, yRange, xRes, yRes, unicodeOutput)
 	
 
+# generate some random triangular distributions
 from random import randint
-
 triangleDists = []
 for i in range(4):
 	a = randint(1,10)

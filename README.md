@@ -22,7 +22,7 @@ Simply copy the files from `src/`.
 
 Basic usage. For more elaborate examples see the files in `examples/`.
 
-### UniVarPoly
+### Simple example with UniVarPoly
 ```python
 >>> from UniVarPoly import UniVarPoly, p_x as x
 
@@ -31,7 +31,7 @@ Basic usage. For more elaborate examples see the files in `examples/`.
 <poly '9x^2 - 6x + 1'>
 ```
 
-### PolyPieceFunc
+### Simple example with PolyPieceFunc
 ```python
 >>> from PolyPieces import PolyPiece, PolyPieceFunc
 
@@ -55,17 +55,14 @@ f(x) =
   -x + 2, x in [1,2]
   0, else
 ```
+
+### Exact computations
 ```python
-# compute density of the sum of three uniformly distributed random variables
->>> uniformDensitySum3 = uniformDensitySum2.conv(uniformDensity)
->>> print(uniformDensitySum3)
-```
-```
-f(x) =
-  0.5x^2,            x in [0,1]
-  -x^2 + 3x - 1.5,   x in [1,2]
-  0.5x^2 - 3x + 4.5, x in [2,3]
-  0, else
+>>> poly_rat = Fraction(5)*x - Fraction(1,4)
+>>> poly_rat
+<poly '5x - 1/4'>
+>>> poly_rat.int()
+<poly '5/2x^2 - 1/4x'>
 ```
 
 ## Tests

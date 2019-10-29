@@ -14,13 +14,6 @@ def triangDistDensity(a,b,c):
 	return PolyPieceFunc([pp1,pp2])*2/(b-a)
 
 
-# generate ascii plot (as string) for piecewise polynomial function
-def plotFpp(fpp, xRange=None, yRange=None, xRes=80, yRes=20, unicodeOutput=True):
-	polyPieces = fpp.polyPieces
-	if xRange is None: xRange = [polyPieces[0].interval[0],polyPieces[-1].interval[1]]
-	return AsciiPlot.plot(lambda x: fpp.eval(x), xRange, yRange, xRes, yRes, unicodeOutput)
-	
-
 # generate some random triangular distributions
 from random import randint
 triangleDists = []
@@ -31,7 +24,7 @@ for i in range(4):
 	triangleDists.append(triangDistDensity(a,b,c))
 
 for td in triangleDists:
-	print(plotFpp(td, [0,20], [0,1], yRes=8))
+	print(AsciiPlot.plotFpp(td, [0,20], [0,1], yRes=8))
 
 from functools import reduce
 densityOfSum = reduce(lambda x,y: x^y, triangleDists)
@@ -39,4 +32,4 @@ densityOfSum = reduce(lambda x,y: x^y, triangleDists)
 print('\ndensity of sum of random variables with triangular distribution')
 print(densityOfSum)
 print()
-print(plotFpp(densityOfSum))
+print(AsciiPlot.plotFpp(densityOfSum))

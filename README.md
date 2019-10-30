@@ -62,6 +62,7 @@ f(x) =
 ```
 ```
 5x - 1/4
+```
 ```python
 >>> print(poly_rat.int())
 ```

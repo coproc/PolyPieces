@@ -59,8 +59,13 @@ f(x) =
 >>> from fractions import Fraction
 >>> poly_rat = Fraction(5)*x - Fraction(1,4)
 >>> print(poly_rat)
+```
+```
 5x - 1/4
+```python
 >>> print(poly_rat.int())
+```
+```
 5/2x^2 - 1/4x
 ```
 

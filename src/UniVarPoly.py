@@ -39,10 +39,21 @@ class UniVarPoly:
 		elif isinstance(coeffs, numbers.Number):
 			self.coeffs = [coeffs]
 		elif isinstance(coeffs, str):
-			p = eval(coeffs, None, {'x': p_x})
+			p = UniVarPoly.fromString(coeffs, 'x')
 			self.coeffs = p.coeffs
 		else:
 			raise ValueError("unexpected type '%s' when constructing polynomial" % type(coeffs))
+
+
+	@staticmethod
+	def fromString(exprStr, varName = 'x'):
+		'''create univariate polynomial from expression string
+		
+		   >>> p = UniVarPoly.fromString('(y-1)**3', 'y')
+		   >>> p.coeffs
+		   [-1, 3, -3, 1]
+		'''
+		return eval(exprStr, None, {varName: p_x})
 
 
 	def deg(self):

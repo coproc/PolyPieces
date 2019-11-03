@@ -7,7 +7,7 @@ from fractions import Fraction
 
 
 class UniVarPoly:
-	def __init__(self, coeffs = [0]):
+	def __init__(self, repr = [0]):
 		'''create univariate polynomial.
 
 		   The coefficients must be given in ascending order.
@@ -32,14 +32,14 @@ class UniVarPoly:
 		   >>> p.coeffs
 		   [-1, 0, 1, 1]
 		'''
-		if type(coeffs) == list:
-			self.coeffs = copy.deepcopy(coeffs)
-		elif isinstance(coeffs, UniVarPoly):
-			self.coeffs = copy.deepcopy(coeffs.coeffs)
-		elif isinstance(coeffs, numbers.Number):
-			self.coeffs = [coeffs]
-		elif isinstance(coeffs, str):
-			p = UniVarPoly.fromString(coeffs, 'x')
+		if type(repr) == list:
+			self.coeffs = copy.deepcopy(repr)
+		elif isinstance(repr, UniVarPoly):
+			self.coeffs = copy.deepcopy(repr.coeffs)
+		elif isinstance(repr, numbers.Number):
+			self.coeffs = [repr]
+		elif isinstance(repr, str):
+			p = UniVarPoly.fromString(repr, 'x')
 			self.coeffs = p.coeffs
 		else:
 			raise ValueError("unexpected type '%s' when constructing polynomial" % type(coeffs))

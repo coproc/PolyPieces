@@ -121,7 +121,7 @@ class PolyPieceFunc:
 
 	def _isContinuous(self, prec=1e-10, printFailReason=False):
 		'''check if piecewise function is continuous.
-		y
+		
 		   >>> fpp = PolyPieceFunc()
 		   >>> fpp._isContinuous()
 		   True

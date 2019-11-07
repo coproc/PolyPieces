@@ -156,13 +156,13 @@ class PolyPieceFunc:
 		   >>> fpp._isConsistent()
 		   True
 		   >>> fpp._selectPP(-2)
-		   (<poly '0'>, 0)
+		   (<UniVarPoly '0'>, 0)
 		   >>> fpp._selectPP(-1)
-		   (<poly 'x'>, 0)
+		   (<UniVarPoly 'x'>, 0)
 		   >>> fpp._selectPP(1)
-		   (<poly 'x'>, 0)
+		   (<UniVarPoly 'x'>, 0)
 		   >>> fpp._selectPP(2)
-		   (<poly '2x'>, 1)
+		   (<UniVarPoly '2x'>, 1)
 		'''
 		if idxStart >= len(self.polyPieces):          return UniVarPoly(),idxStart
 		if x0 < self.polyPieces[idxStart].interval[0]: return UniVarPoly(),idxStart

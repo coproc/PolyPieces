@@ -441,6 +441,7 @@ class UniVarPoly:
 		   '1'
 		'''
 		if isinstance(c, Fraction): return str(c)
+		if isinstance(c, UniVarPoly): return c.format()
 		cFormat = '%f' if prec is None else ('%%.%df' % prec)
 		cRepr = cFormat % c
 		if '.' in cRepr:
@@ -454,42 +455,42 @@ class UniVarPoly:
 		return cRepr
 
 		
-	def __str__(self, varName='x', parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
+	def format(self, varName='x', parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
 		'''generate string representation of polymial
 
-		   >>> str(UniVarPoly())
+		   >>> UniVarPoly().format()
 		   '0'
-		   >>> str(UniVarPoly(-1)) 
+		   >>> UniVarPoly(-1).format()
 		   '-1'
-		   >>> str(UniVarPoly([0,1]))
+		   >>> UniVarPoly([0,1]).format()
 		   'x'
-		   >>> str(UniVarPoly([0,-1]))
+		   >>> UniVarPoly([0,-1]).format()
 		   '-x'
-		   >>> str(UniVarPoly([0,2]))
+		   >>> UniVarPoly([0,2]).format()
 		   '2x'
-		   >>> str(UniVarPoly([1,2]))
+		   >>> UniVarPoly([1,2]).format()
 		   '2x + 1'
-		   >>> str(UniVarPoly([1,0,1]))
+		   >>> UniVarPoly([1,0,1]).format()
 		   'x^2 + 1'
-		   >>> str(UniVarPoly([-1,-1,-1]))
+		   >>> UniVarPoly([-1,-1,-1]).format()
 		   '-x^2 - x - 1'
-		   >>> str(UniVarPoly([1.0]))
+		   >>> UniVarPoly([1.0]).format()
 		   '1'
-		   >>> str(UniVarPoly([0.0, -1.0]))
+		   >>> UniVarPoly([0.0, -1.0]).format()
 		   '-x'
-		   >>> UniVarPoly([2,0,-2]).__str__(varName='y')
+		   >>> UniVarPoly([2,0,-2]).format(varName='y')
 		   '-2y^2 + 2'
-		   >>> UniVarPoly([2,0,-2]).__str__(parenthesizeCoeffs=True)
+		   >>> UniVarPoly([2,0,-2]).format(parenthesizeCoeffs=True)
 		   '(-2)x^2 + 2'
-		   >>> UniVarPoly([0.0001,0.9999]).__str__(coeffPrec=3)
+		   >>> UniVarPoly([0.0001,0.9999]).format(coeffPrec=3)
 		   'x'
-		   >>> UniVarPoly([2,2,-1]).__str__(opMul='*')
+		   >>> UniVarPoly([2,2,-1]).format(opMul='*')
 		   '-x^2 + 2*x + 2'
-		   >>> UniVarPoly([2,0,-1]).__str__(opPow='**')
+		   >>> UniVarPoly([2,0,-1]).format(opPow='**')
 		   '-x**2 + 2'
-		   >>> UniVarPoly([-1,0,-1]).__str__(termOrderAsc=True)
+		   >>> UniVarPoly([-1,0,-1]).format(termOrderAsc=True)
 		   '-1 - x^2'
-		   >>> UniVarPoly([2,0,-2]).__str__(termSep='')
+		   >>> UniVarPoly([2,0,-2]).format(termSep='')
 		   '-2x^2+2'
 		'''
 		idxStart,idxEnd,idxIncr = (0,len(self.coeffs),1) if termOrderAsc else (len(self.coeffs)-1,-1,-1)
@@ -531,8 +532,17 @@ class UniVarPoly:
 		return strRepr if strRepr else '0'
 
 
+	def __str__(self):
+		'''overload conversion to string
+		
+		   >>> str(UniVarPoly([-1, 1]))
+		   'x - 1'
+		'''
+		return self.format(varName='x', parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' ')
+
+
 	def __repr__(self):
-		return "<poly '" + str(self) + "'>"
+		return "<UniVarPoly '" + str(self) + "'>"
 
 
 	def _eqCoeffs(self, coeffs, eps):

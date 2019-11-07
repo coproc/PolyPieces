@@ -7,34 +7,53 @@ from fractions import Fraction
 
 
 class UniVarPoly:
-	def __init__(self, coeffs = [0]):
+	def __init__(self, repr = [0]):
 		'''create univariate polynomial.
 
 		   The coefficients must be given in ascending order.
 		   If no coefficients are given [0] (the 0 polynomial) is assumed.
 		   If a polynomial is given, its coefficents are (deeply) copied.
-		   >>> p = UniVarPoly()
-		   >>> p.coeffs
+		   >>> p_0 = UniVarPoly()
+		   >>> p_0.coeffs
 		   [0]
-		   >>> p = UniVarPoly(1)
-		   >>> p.coeffs
+		   >>> p_1 = UniVarPoly(1)
+		   >>> p_1.coeffs
 		   [1]
-		   >>> p = UniVarPoly([0,0,1]) # x^2
-		   >>> p.coeffs
+		   >>> p_x2 = UniVarPoly([0,0,1]) # x^2
+		   >>> p_x2.coeffs
 		   [0, 0, 1]
+		   >>> p = UniVarPoly('(x-1)*(x+1)')
+		   >>> p.coeffs
+		   [-1, 0, 1]
 		   >>> p2 = UniVarPoly(p)
 		   >>> p.coeffs.append(1)
 		   >>> p2.coeffs
-		   [0, 0, 1]
+		   [-1, 0, 1]
 		   >>> p.coeffs
-		   [0, 0, 1, 1]
+		   [-1, 0, 1, 1]
 		'''
-		if type(coeffs) == list:
-			self.coeffs = copy.deepcopy(coeffs)
-		elif isinstance(coeffs, UniVarPoly):
-			self.coeffs = copy.deepcopy(coeffs.coeffs)
+		if type(repr) == list:
+			self.coeffs = copy.deepcopy(repr)
+		elif isinstance(repr, UniVarPoly):
+			self.coeffs = copy.deepcopy(repr.coeffs)
+		elif isinstance(repr, numbers.Number):
+			self.coeffs = [repr]
+		elif isinstance(repr, str):
+			p = UniVarPoly.fromString(repr, 'x')
+			self.coeffs = p.coeffs
 		else:
-			self.coeffs = [coeffs]
+			raise ValueError("unexpected type '%s' when constructing polynomial" % type(coeffs))
+
+
+	@staticmethod
+	def fromString(exprStr, varName = 'x'):
+		'''create univariate polynomial from expression string
+		
+		   >>> p = UniVarPoly.fromString('(y-1)**3', 'y')
+		   >>> p.coeffs
+		   [-1, 3, -3, 1]
+		'''
+		return eval(exprStr, None, {varName: p_x})
 
 
 	def deg(self):
@@ -351,6 +370,26 @@ class UniVarPoly:
 		self.imul(1/d)
 		return self
 
+
+	def __pow__(self, e):
+		'''overlaod operator ** (exponentiation)
+
+		   >>> p = UniVarPoly([-1,1])
+		   >>> p2 = p**2
+		   >>> p2.coeffs
+		   [1, -2, 1]
+		   >>> p3 = p**3
+		   >>> p3.coeffs
+		   [-1, 3, -3, 1]
+		'''
+		res = UniVarPoly(1)
+		p_2 = UniVarPoly(self)
+		while (e>0):
+			if e % 2: res *= p_2
+			e >>= 1
+			p_2 *= p_2
+		return res
+		
 
 	def comp(self, poly):
 		'''compute polynomial composition self o poly

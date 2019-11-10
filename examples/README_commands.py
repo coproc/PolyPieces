@@ -25,7 +25,12 @@ print(uniformDensity)
 # compute density of the sum of two uniformly distributed random variables (by convolution)
 uniformDensitySum2 = uniformDensity.conv(uniformDensity)
 print(uniformDensitySum2)
-from fractions import Fraction
-poly_rat = Fraction(5)*x - Fraction(1,4)
+from UniVarPoly import p_1_rat, p_x_rat
+poly_rat = 5*p_x_rat - p_1_rat/4
 print(poly_rat)
-print(poly_rat.int())
+# indefinite integral
+_p_= poly_rat.int()
+_p()
+# exponentiation
+_p_= poly_rat**4
+_p()

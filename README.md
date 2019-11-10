@@ -59,18 +59,26 @@ f(x) =
 
 ### Exact computations
 ```python
->>> from fractions import Fraction
->>> poly_rat = Fraction(5)*x - Fraction(1,4)
+>>> from UniVarPoly import p_1_rat, p_x_rat
+>>> poly_rat = 5*p_x_rat - p_1_rat/4
 >>> print(poly_rat)
 ```
 ```
 5x - 1/4
 ```
 ```python
->>> print(poly_rat.int())
+# indefinite integral
+>>> poly_rat.int()
 ```
 ```
-5/2x^2 - 1/4x
+<UniVarPoly '5/2x^2 - 1/4x'>
+```
+```python
+# exponentiation
+>>> poly_rat**4
+```
+```
+<UniVarPoly '625x^4 - 125x^3 + 75/8x^2 - 5/16x + 1/256'>
 ```
 
 ## Tests

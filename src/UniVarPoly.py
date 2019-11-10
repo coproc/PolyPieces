@@ -353,9 +353,12 @@ class UniVarPoly:
 		   [-0.2, 0.4]
 		'''
 		if isinstance(d, numbers.Number):
-			return self.scaled(1/d)
-		else:
-			return NotImplemented
+			try:
+				scaleFac = Fraction(1, d)
+			except TypeError:
+				scaleFac = 1/d
+			return self.scaled(scaleFac)
+		raise TypeError('division by polynomial not implemented')
 
 
 	def __idiv__(self, d):
@@ -367,8 +370,14 @@ class UniVarPoly:
 		   >>> p.coeffs
 		   [-0.5, 0.5]
 		'''
-		self.imul(1/d)
-		return self
+		if isinstance(d, numbers.Number):
+			try:
+				scaleFac = Fraction(1, d)
+			except TypeError:
+				scaleFac = 1/d
+			self.imul(scaleFac)
+			return self
+		raise TypeError('division by polynomial not implemented')
 
 
 	def __pow__(self, e):
@@ -603,12 +612,18 @@ class UniVarPoly:
 		return self._eqCoeffs(coeffs, eps)
 
 
-# predefined polynomials
+# predefined polynomials with coefficients of type int
 p_0  = UniVarPoly()
 p_1  = UniVarPoly(1)
 p_x  = UniVarPoly([0,1])
 p_x2 = UniVarPoly([0,0,1])
 p_x3 = UniVarPoly([0,0,0,1])
+
+
+# predefined polynomials with rational coefficents for exact arithmetic
+p_0_rat  = UniVarPoly(Fraction(0))
+p_1_rat  = UniVarPoly(Fraction(1))
+p_x_rat  = UniVarPoly([Fraction(0),Fraction(1)])
 
 
 if __name__ == "__main__":

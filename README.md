@@ -1,12 +1,15 @@
 # PolyPieces README
 
-The main intent of this library is to compute the convolution of piecewise polynomial functions
-for getting the density functions of sums of random variables.
+The main intent of this package is to compute the convolution of piecewise polynomial functions
+(for getting the density functions of sums of random variables).
+Therefor it provides 
+* the class `UniVarPoly` for basic arithmetic with univariate polynomials and 
+* the class `PolyPieceFunc` for basic arithmetic with piecewise polynomial functions.
 
 The coefficient domain used for computing with the polynomials is defined by the types of the coefficients 
-of the input polynomials. 
+of the input polynomials.
 If the original coefficients are integers, the computations will be carried out with integers as long
-as no divisions occur.
+as no divisions occur. Standard division in Python3 converts integers to floats.
 If the original coefficients are fractions (`fractions.Fraction`), the computations will be carried out
 with exact arithmetic and printed with fractions.
 
@@ -26,7 +29,7 @@ Basic usage. For more elaborate examples see the files in `examples/`.
 
 >>> poly = 3*x - 1
 >>> poly*poly
-<poly '9x^2 - 6x + 1'>
+<UniVarPoly '9x^2 - 6x + 1'>
 ```
 
 ### Simple example with PolyPieceFunc

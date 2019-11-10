@@ -387,8 +387,7 @@ class PolyPieceFunc:
 		'''
 		if isinstance(op2, numbers.Number):
 			return self._binArithOp(op2, lambda x,y: x/y)
-		else:
-			return NotImplemented
+		raise TypeError("divisor of invalid type '%s' (must be number)" % type(op2))
 
 
 	def __idiv__(self, op2):
@@ -401,7 +400,7 @@ class PolyPieceFunc:
 		   [-0.5, 0.5]
 		'''
 		if not isinstance(op2, numbers.Number):
-			raise ValueError("divisor of invalid type '%s' (must be number)" % type(op2))
+			raise TypeError("divisor of invalid type '%s' (must be number)" % type(op2))
 		for pp in self.polyPieces:
 			pp /= op2
 		return self

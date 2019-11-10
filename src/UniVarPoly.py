@@ -351,7 +351,7 @@ class UniVarPoly:
 		   >>> p1 = UniVarPoly([-1,2])
 		   >>> p = p1 / 5
 		   >>> p.coeffs
-		   [-0.2, 0.4]
+		   [Fraction(-1, 5), Fraction(2, 5)]
 		'''
 		if isinstance(d, numbers.Number):
 			try:
@@ -359,7 +359,7 @@ class UniVarPoly:
 			except TypeError:
 				scaleFac = 1/d
 			return self.scaled(scaleFac)
-		raise TypeError('division by polynomial not implemented')
+		raise TypeError("divisor of invalid type %s (must be number)" % type(d))
 
 
 	def __idiv__(self, d):
@@ -369,7 +369,7 @@ class UniVarPoly:
 		   >>> p = UniVarPoly([-1,1])
 		   >>> p /= 2
 		   >>> p.coeffs
-		   [-0.5, 0.5]
+		   [Fraction(-1, 2), Fraction(1, 2)]
 		'''
 		if isinstance(d, numbers.Number):
 			try:
@@ -378,7 +378,7 @@ class UniVarPoly:
 				scaleFac = 1/d
 			self.imul(scaleFac)
 			return self
-		raise TypeError('division by polynomial not implemented')
+		raise TypeError("divisor of invalid type %s (must be number)" % type(d))
 
 
 	def __pow__(self, e):
@@ -441,9 +441,9 @@ class UniVarPoly:
 		
 		   >>> p = UniVarPoly([0, 1])
 		   >>> p.int().coeffs
-		   [0, 0, 0.5]
+		   [0, 0, Fraction(1, 2)]
 		   >>> p.int([0,1])
-		   0.5
+		   Fraction(1, 2)
 		'''
 		if interval is None:
 			return self.intIndef()
@@ -455,7 +455,7 @@ class UniVarPoly:
 
 		   >>> p = UniVarPoly([0, 1])
 		   >>> p.intDef([0,1])
-		   0.5
+		   Fraction(1, 2)
 		'''
 		pIntIndef = self.intIndef()
 		return pIntIndef.eval(interval[1]) - pIntIndef.eval(interval[0])
@@ -464,15 +464,14 @@ class UniVarPoly:
 	def intIndef(self):
 		'''indefinite integral
 
-		   >>> p1 = UniVarPoly([0, 1])
+		   >>> p1 = UniVarPoly([1, 1])
 		   >>> p1.intIndef().coeffs
-		   [0, 0, 0.5]
+		   [0, 1, Fraction(1, 2)]
 		'''
 		c0 = self.coeffs[0]
-		coeffsInt = [c0-c0] # make new coefficient the same type as existing ones
-		coeffsInt.append(c0) # special case: avoid division by 1 as it would change type 'int' to type 'float'
-		for i in range(1, len(self.coeffs)):
-			coeffsInt.append(self.coeffs[i]/(i+1))
+		# make new coefficient (0) the same type as existing ones
+		# save division by 1
+		coeffsInt = [c0-c0, c0] + [self.coeffs[i]*Fraction(1,i+1) for i in range(1, len(self.coeffs))]
 		return UniVarPoly(coeffsInt)
 
 

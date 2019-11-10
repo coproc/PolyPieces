@@ -7,7 +7,7 @@ from fractions import Fraction
 
 
 class UniVarPoly:
-	def __init__(self, repr = [0]):
+	def __init__(self, repr=[0], varName='x'):
 		'''create univariate polynomial.
 
 		   The coefficients must be given in ascending order.
@@ -32,6 +32,7 @@ class UniVarPoly:
 		   >>> p.coeffs
 		   [-1, 0, 1, 1]
 		'''
+		self.varName = varName
 		if type(repr) == list:
 			self.coeffs = copy.deepcopy(repr)
 		elif isinstance(repr, UniVarPoly):
@@ -39,14 +40,14 @@ class UniVarPoly:
 		elif isinstance(repr, numbers.Number):
 			self.coeffs = [repr]
 		elif isinstance(repr, str):
-			p = UniVarPoly.fromString(repr, 'x')
+			p = UniVarPoly.fromString(repr, varName)
 			self.coeffs = p.coeffs
 		else:
 			raise ValueError("unexpected type '%s' when constructing polynomial" % type(coeffs))
 
 
 	@staticmethod
-	def fromString(exprStr, varName = 'x'):
+	def fromString(exprStr, varName='x'):
 		'''create univariate polynomial from expression string
 		
 		   >>> p = UniVarPoly.fromString('(y-1)**3', 'y')
@@ -502,9 +503,9 @@ class UniVarPoly:
 			cRepr = '0.' if c > 0 else '-0.' # signal a non-zero number with small absolute value
 		return cRepr
 
-		
-	def format(self, varName='x', parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
-		'''generate string representation of polymial
+
+	def format(self, parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
+		'''generate string representation of polynomial
 
 		   >>> UniVarPoly().format()
 		   '0'
@@ -526,7 +527,7 @@ class UniVarPoly:
 		   '1'
 		   >>> UniVarPoly([0.0, -1.0]).format()
 		   '-x'
-		   >>> UniVarPoly([2,0,-2]).format(varName='y')
+		   >>> UniVarPoly([2,0,-2], 'y').format()
 		   '-2y^2 + 2'
 		   >>> UniVarPoly([2,0,-2]).format(parenthesizeCoeffs=True)
 		   '(-2)x^2 + 2'
@@ -574,7 +575,7 @@ class UniVarPoly:
 						coeffShown = True
 			if i>0:
 				if coeffShown: strRepr += opMul;
-				strRepr += '%s' % varName
+				strRepr += '%s' % self.varName
 				if i>1:
 					strRepr += '%s%d' % (opPow, i)
 		return strRepr if strRepr else '0'
@@ -586,11 +587,11 @@ class UniVarPoly:
 		   >>> str(UniVarPoly([-1, 1]))
 		   'x - 1'
 		'''
-		return self.format(varName='x', parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' ')
+		return self.format(parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' ')
 
 
 	def __repr__(self):
-		return "<UniVarPoly '" + str(self) + "'>"
+		return "<UniVarPoly '%s'>" % self
 
 
 	def _eqCoeffs(self, coeffs, eps):

@@ -2,6 +2,7 @@
 '''
 import sys
 import numbers
+from fractions import Fraction
 from UniVarPoly import UniVarPoly
 
 
@@ -382,25 +383,27 @@ class PolyPieceFunc:
 		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
 		   >>> print(fpp / 2)
 		   f(x) =
-		     0.5x, x in [0,1]
+		     1/2x, x in [0,1]
 		     0, else
 		'''
 		if isinstance(op2, numbers.Number):
 			return self._binArithOp(op2, lambda x,y: x/y)
-		raise TypeError("divisor of invalid type '%s' (must be number)" % type(op2))
+		raise TypeError("divisor of invalid type %s (must be number)" % type(op2))
 
 
 	def __idiv__(self, op2):
 		'''overload operator /=
 		   (divisor must be number)
 		
-		   >>> p = UniVarPoly([-1,1])
-		   >>> p /= 2
-		   >>> p.coeffs
-		   [-0.5, 0.5]
+		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> fpp /= 2
+		   >>> print(fpp)
+		   f(x) =
+		     1/2x, x in [0,1]
+		     0, else
 		'''
 		if not isinstance(op2, numbers.Number):
-			raise TypeError("divisor of invalid type '%s' (must be number)" % type(op2))
+			raise TypeError("divisor of invalid type %s (must be number)" % type(op2))
 		for pp in self.polyPieces:
 			pp /= op2
 		return self
@@ -422,7 +425,7 @@ class PolyPieceFunc:
 		   >>> list(map(lambda x: fppDer.eval(x), [-2,-1,0,1,2]))
 		   [0, 2, 0, -2, 0]
 		   >>> fppDer.int()
-		   0.0
+		   0
 		'''
 		# derivative of constant polynomial is the zero polynomial
 		fDer = PolyPieceFunc()
@@ -442,7 +445,7 @@ class PolyPieceFunc:
 		   1
 		   >>> fpp2 = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]),[0,1]), PolyPiece(UniVarPoly([2,-1]),[1,2])])
 		   >>> fpp2.int([-1,3])
-		   1.0
+		   1
 		   >>> fpp2.int([0.5,3])
 		   0.875
 		   >>> fpp2.int([-1,1.5])
@@ -456,6 +459,7 @@ class PolyPieceFunc:
 			if pp.interval[1] < interval[0]: continue
 			intVal += pp.poly.intDef([max(interval[0], pp.interval[0]),
 			                          min(interval[1], pp.interval[1])])
+		if isinstance(intVal, Fraction) and intVal.denominator == 1: intVal = intVal.numerator
 		return intVal
 
 

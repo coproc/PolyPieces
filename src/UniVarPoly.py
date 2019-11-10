@@ -345,13 +345,16 @@ class UniVarPoly:
 
 
 	def __truediv__(self, d):
-		'''overload operator /
+		'''overload operators /, /=
 		   (divisor must be number, polynomial division not implemented)
 		
 		   >>> p1 = UniVarPoly([-1,2])
 		   >>> p = p1 / 5
 		   >>> p.coeffs
 		   [Fraction(-1, 5), Fraction(2, 5)]
+		   >>> p /= 2
+		   >>> p.coeffs
+		   [Fraction(-1, 10), Fraction(1, 5)]
 		'''
 		if isinstance(d, numbers.Number):
 			try:
@@ -359,25 +362,6 @@ class UniVarPoly:
 			except TypeError:
 				scaleFac = 1/d
 			return self.scaled(scaleFac)
-		raise TypeError("divisor of invalid type %s (must be number)" % type(d))
-
-
-	def __idiv__(self, d):
-		'''overload operator /=
-		   (divisor must be number, polynomial division not implemented)
-		
-		   >>> p = UniVarPoly([-1,1])
-		   >>> p /= 2
-		   >>> p.coeffs
-		   [Fraction(-1, 2), Fraction(1, 2)]
-		'''
-		if isinstance(d, numbers.Number):
-			try:
-				scaleFac = Fraction(1, d)
-			except TypeError:
-				scaleFac = 1/d
-			self.imul(scaleFac)
-			return self
 		raise TypeError("divisor of invalid type %s (must be number)" % type(d))
 
 

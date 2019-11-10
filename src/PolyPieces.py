@@ -222,10 +222,14 @@ class PolyPieceFunc:
 			raise ValueError("composition only implemented for polynomials up to degree 1, degree %d received" % p.deg())
 
 		d,k = p.coeffs
+		try:
+			scaleFacIntv = Fraction(1,k)
+		except TypeError:
+			scaleFacIntv = 1/k
 		fppComp = PolyPieceFunc()
 		for pp in self.polyPieces:
 			a,b = pp.interval
-			fppComp.polyPieces.append(PolyPiece(pp.poly.comp(p), [(a-d)/k,(b-d)/k]))
+			fppComp.polyPieces.append(PolyPiece(pp.poly.comp(p), [(a-d)*scaleFacIntv,(b-d)*scaleFacIntv]))
 			
 		return fppComp
 

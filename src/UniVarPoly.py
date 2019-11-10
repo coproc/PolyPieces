@@ -604,12 +604,6 @@ p_x2 = UniVarPoly([0,0,1])
 p_x3 = UniVarPoly([0,0,0,1])
 
 
-# predefined polynomials with rational coefficents for exact arithmetic
-p_0_rat  = UniVarPoly(Fraction(0))
-p_1_rat  = UniVarPoly(Fraction(1))
-p_x_rat  = UniVarPoly([Fraction(0),Fraction(1)])
-
-
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()

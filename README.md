@@ -7,11 +7,11 @@ Therefor it provides
 * the class `PolyPieceFunc` for basic arithmetic with piecewise polynomial functions.
 
 The coefficient domain used for computing with the polynomials is defined by the types of the coefficients 
-of the input polynomials.
-If the original coefficients are integers, the computations will be carried out with integers as long
-as no divisions occur. Standard division in Python3 converts integers to floats.
-If the original coefficients are fractions (`fractions.Fraction`), the computations will be carried out
-with exact arithmetic and printed with fractions.
+of the input polynomials. Any number type, including complex and rational numbers (via type `fractions.Fraction`), can be used.
+If the original coefficients are integers, the computations will be carried out with exact arithmetic:
+the computations stick with integers as long as possible, 
+a division with an integer divisor results in fractions (type `fractions.Fraction`).
+To convert a polynomial with integer or rational coefficients to a polynomial with coefficients of type `float` multiply it with the float value `1.0`.
 
 
 ## Installation
@@ -59,8 +59,8 @@ f(x) =
 
 ### Exact computations
 ```python
->>> from UniVarPoly import p_1_rat, p_x_rat
->>> poly_rat = 5*p_x_rat - p_1_rat/4
+>>> from UniVarPoly import p_1, p_x
+>>> poly_rat = 5*p_x - p_1/4
 >>> print(poly_rat)
 ```
 ```

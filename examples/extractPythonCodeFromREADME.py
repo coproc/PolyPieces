@@ -47,7 +47,7 @@ with open(README_PATH) as fileIn:
 					codeType = line[3:].strip()
 				else:
 					if linePrev and linePrev.startswith('>>> ') and _isExpression(linePrev[4:]):
-						print("linePrev='%s'" % linePrev)
+						#print("linePrev='%s'" % linePrev)
 						fileOut.write('_p()\n')
 					codeType = None
 					linePrev = None

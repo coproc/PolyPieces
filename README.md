@@ -1,6 +1,6 @@
 # PolyPieces README
 
-The main intent of this package is to compute the convolution of piecewise polynomial functions
+The main intent of this package is to compute the exact convolution of piecewise polynomial functions
 (for getting the density functions of sums of random variables).
 Therefor it provides 
 * the class `UniVarPoly` for basic symbolic computation with univariate polynomials and 

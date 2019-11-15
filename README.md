@@ -3,15 +3,13 @@
 The main intent of this package is to compute the convolution of piecewise polynomial functions
 (for getting the density functions of sums of random variables).
 Therefor it provides 
-* the class `UniVarPoly` for basic arithmetic with univariate polynomials and 
-* the class `PolyPieceFunc` for basic arithmetic with piecewise polynomial functions.
+* the class `UniVarPoly` for basic symbolic computation with univariate polynomials and 
+* the class `PolyPieceFunc` for basic symbolic computation with piecewise polynomial functions.
 
 The coefficient domain used for computing with the polynomials is defined by the types of the coefficients 
 of the input polynomials. Any number type, including complex and rational numbers (via type `fractions.Fraction`), can be used.
-If the original coefficients are integers, the computations will be carried out with exact arithmetic:
-the computations stick with integers as long as possible, 
-a division with an integer divisor results in fractions (type `fractions.Fraction`).
-To convert a polynomial with integer or rational coefficients to a polynomial with coefficients of type `float` multiply it with the float value `1.0`.
+If the original coefficients are integers, the computations will be carried out with exact arithmetic over the integers or rationals.
+To convert a polynomial's (or a piecewise polynomial function's) integer or rational coefficients to type `float`, multiply it with the float value `1.0`.
 
 
 ## Installation

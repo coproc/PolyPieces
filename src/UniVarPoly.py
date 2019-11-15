@@ -7,12 +7,17 @@ from fractions import Fraction
 
 
 class UniVarPoly:
-	def __init__(self, repr=[0], varName='x'):
+	def __init__(self, repr=0, varName='x'):
 		'''create univariate polynomial.
 
+		   A polynomial can be constructed from its list of coefficients.
 		   The coefficients must be given in ascending order.
-		   If no coefficients are given [0] (the 0 polynomial) is assumed.
-		   If a polynomial is given, its coefficents are (deeply) copied.
+		   If a single number is given instead of a list the corresponding constant
+		   polynomial is constructed.
+		   If a polynomial is given its coefficents are (deeply) copied.
+		   If a string is given it is evaluated as Python expression in the given
+		   variable (default: 'x').
+		   If no input is given the 0 polynomial is assumed.
 		   >>> p_0 = UniVarPoly()
 		   >>> p_0.coeffs
 		   [0]
@@ -33,9 +38,7 @@ class UniVarPoly:
 		   [-1, 0, 1, 1]
 		'''
 		self.varName = varName
-		if type(repr) == list:
-			self.coeffs = copy.deepcopy(repr)
-		elif isinstance(repr, UniVarPoly):
+		if isinstance(repr, UniVarPoly):
 			self.coeffs = copy.deepcopy(repr.coeffs)
 		elif isinstance(repr, numbers.Number):
 			self.coeffs = [repr]
@@ -43,8 +46,13 @@ class UniVarPoly:
 			p = UniVarPoly.fromString(repr, varName)
 			self.coeffs = p.coeffs
 		else:
-			raise ValueError("unexpected type '%s' when constructing polynomial" % type(coeffs))
-
+			try:
+				iter(repr)
+				self.coeffs = list(copy.deepcopy(repr))
+				if len(self.coeffs) == 0: self.coeffs.append(0)
+			except TypeError:
+				raise TypeError('unexpected type "%s" when constructing polynomial' % type(coeffs))
+			
 
 	@staticmethod
 	def fromString(exprStr, varName='x'):

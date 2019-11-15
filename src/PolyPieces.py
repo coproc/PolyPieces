@@ -8,9 +8,23 @@ from UniVarPoly import UniVarPoly
 
 class PolyPiece:
 	'''polynomial over interval'''
-	def __init__(self, poly, interval):
-		self.poly = poly if isinstance(poly, UniVarPoly) else UniVarPoly(poly)
-		self.interval = interval
+	def __init__(self, poly, interval=None):
+		if interval is None:
+			if isinstance(poly, PolyPiece):
+				self.poly = poly.poly
+				self.interval = poly.interval
+			else:
+				try:
+					self.poly,self.interval = poly
+				except Exception:
+					raise TypeError("PolyPiece cannot be constructed from '%s'" % poly)
+		else:
+			self.poly = poly if isinstance(poly, UniVarPoly) else UniVarPoly(poly)
+			self.interval = interval
+			if len(self.interval) != 2 or not all([isinstance(n, numbers.Real) for n in self.interval]):
+				raise TypeError("cannot create PolyPiece: invalid interval '%s'" % interval)
+			if  self.interval[0] > self.interval[1]:
+				raise ValueError("cannot create PolyPiece: invalid interval '%s'" % interval)
 
 
 	def conv(self, pp):
@@ -85,7 +99,21 @@ class PolyPiece:
 
 
 class PolyPieceFunc:
-	'''piecewise polynomial function'''
+	'''create piecewise polynomial function
+	
+	   >>> fpp = PolyPieceFunc(PolyPiece(1,[0,1]))
+	   >>> print(fpp)
+	   f(x) =
+	     1, x in [0,1]
+	     0, else
+	   >>> from UniVarPoly import p_x as x
+	   >>> fpp = PolyPieceFunc(((x,[0,1]), (1-x,[1,2])))
+	   >>> print(fpp)
+	   f(x) =
+	     x,      x in [0,1]
+	     -x + 1, x in [1,2]
+	     0, else
+	'''
 	def __init__(self, polyPieces=None):
 		if polyPieces is None:
 			self.polyPieces = []
@@ -94,11 +122,14 @@ class PolyPieceFunc:
 		elif isinstance(polyPieces, list) and all([isinstance(pp, PolyPiece) for pp in polyPieces]):
 			self.polyPieces = polyPieces
 		else:
-			argType = str(type(polyPieces))
-			if type(polyPieces) == list: argType = 'list(%s)' % type(polyPieces[0])
-			raise ValueError("unsupported argument type \"%s\"" % argType) 
+			try:
+				self.polyPieces = [PolyPiece(pp) for pp in polyPieces]
+			except TypeError:
+				raise TypeError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
+			except Exception:
+				raise ValueError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
 		if not self._isConsistent():
-			raise ValueError("invalid poly pieces")
+			raise ValueError("invalid poly pieces in '%s'" % polyPieces)
 
 
 	def _isConsistent(self, prec=1e-10, printFailReason=False):
@@ -488,3 +519,5 @@ class PolyPieceFunc:
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()
+	#fpp = PolyPieceFunc(PolyPiece(1,[0,1]))
+	#print(fpp)

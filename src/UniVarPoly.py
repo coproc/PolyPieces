@@ -270,6 +270,8 @@ class UniVarPoly:
 
 
 	def _mulCoeffs(self, coeffs):
+		if self.coeffs == [0] or coeffs == [0]:
+			return [0]
 		coeffsMul = []
 		for i in range(len(self.coeffs) + len(coeffs) - 1):
 			ci = 0
@@ -310,6 +312,9 @@ class UniVarPoly:
 		   >>> p = p1 * p2
 		   >>> p.coeffs
 		   [0, 1, 1]
+		   >>> p0 = p1 * UniVarPoly(0)
+		   >>> p0.coeffs
+		   [0]
 		'''
 		if isinstance(poly, numbers.Number):
 			return self.scaled(poly)

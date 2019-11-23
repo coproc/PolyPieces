@@ -114,6 +114,11 @@ class PolyPieceFunc:
 	     x,      x in [0,1]
 	     -x + 1, x in [1,2]
 	     0, else
+	   >>> fpp = PolyPieceFunc(((x,[0,1]), (0,[1,2])))
+	   >>> print(fpp)
+	   f(x) =
+	     x, x in [0,1]
+	     0, else
 	'''
 	def __init__(self, polyPieces=None):
 		if polyPieces is None:
@@ -129,6 +134,7 @@ class PolyPieceFunc:
 				raise TypeError("piecewise polynomial function cannot be created from '%s'" % [polyPieces])
 			except Exception:
 				raise ValueError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
+		self._normalize()
 		if not self._isConsistent():
 			raise ValueError("invalid poly pieces in '%s'" % polyPieces)
 
@@ -264,6 +270,17 @@ class PolyPieceFunc:
 			fppComp.polyPieces.append(PolyPiece(pp.poly.comp(p), [(a-d)*scaleFacIntv,(b-d)*scaleFacIntv]))
 			
 		return fppComp
+
+
+	# for debugging purposes
+	def _log(self, msg):
+		with open('debug.log','a') as f:
+			f.write('%s:\n%s\n' % (msg, self))
+
+
+	# remove intervals with 0-polynomials
+	def _normalize(self):
+		self.polyPieces = [pp for pp in self.polyPieces if pp.poly != 0 and pp.interval[0] != pp.interval[1]]
 
 
 	def _binArithOp(self, op2, opFunc):
@@ -502,7 +519,7 @@ class PolyPieceFunc:
 	def __ixor__(self, fpp):
 		self.polyPieces = (self ^ fpp).polyPieces
 		return self
-		
+
 
 	@staticmethod
 	def _align(key, strings):
@@ -511,6 +528,8 @@ class PolyPieceFunc:
 
 
 	def __str__(self):
+		if not self.polyPieces:
+			return 'f(x) = 0'
 		pieceReprs = [str(pp) for pp in self.polyPieces]
 		pieceReprs = PolyPieceFunc._align('x in', pieceReprs)
 		indent = '  '

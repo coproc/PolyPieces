@@ -1,8 +1,10 @@
+import os
+import unicodedata
+
+
 # dot characters in ascending heights
-PLOT_DOTS = ('\N{COMBINING DOT BELOW}', '.', '\N{MIDDLE DOT}', '\N{DOT ABOVE}')
-# print((len(PLOT_DOTS)+1)*' '+PLOT_DOTS[0])
-# print('_'+''.join(PLOT_DOTS)+'+')
-# print(PLOT_DOTS[-1])
+PLOT_DOTS = ('\N{COMBINING DOT BELOW}', '.', '\N{MIDDLE DOT}', '\N{COMBINING DOT ABOVE}')
+
 
 # generate a string representing an ASCII plot
 # @param f function to plot
@@ -11,8 +13,14 @@ PLOT_DOTS = ('\N{COMBINING DOT BELOW}', '.', '\N{MIDDLE DOT}', '\N{DOT ABOVE}')
 # @param xRes resolution in x-direction in number of characters
 # @param yRes resolution in y-direction in number of lines
 # @param unicodeOutput if set to False, only the decimal point '.' will be used
+# @param insertSpacesBeforeCombiningChars in windows terminals combining characters are printed separately by default,
+#                                         on linux systems those characters are handled correctly, so a space must be
+#                                         inserted before to avoid combining with the previous dot
+#                                         default: None (choose value dependent on operating system)
 # @return string with (yRes+1) lines, each (xRes+1) characters long
-def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True):
+def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True, insertSpacesBeforeCombiningChars=None):
+	if insertSpacesBeforeCombiningChars is None:
+		insertSpacesBeforeCombiningChars = os.name != 'nt'
 	dx = (xRange[1]-xRange[0])/xRes
 	xVals = [xRange[0]+i*dx for i in range(xRes+1)]
 	yVals = [f(x) for x in xVals]
@@ -25,7 +33,12 @@ def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True):
 		line = plotArea[yIdx]
 		dotChar = PLOT_DOTS[3-int(3.98*(yScaled-yIdx)+0.01)] if unicodeOutput else '.'
 		plotArea[yIdx] = line[0:xIdx] + dotChar + line[xIdx+1:]
-	return '\n'.join(plotArea)
+	plotString = '\n'.join(plotArea)
+	if insertSpacesBeforeCombiningChars:
+		for c in PLOT_DOTS:
+			if unicodedata.category(c) == 'Mn':
+				plotString = plotString.replace(c, ' '+c)
+	return plotString
 
 
 # generate ascii plot (as string) for piecewise polynomial function.

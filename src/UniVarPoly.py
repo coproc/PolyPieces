@@ -241,7 +241,12 @@ class UniVarPoly:
 		   >>> p.scale(2)
 		   >>> p.coeffs
 		   [4, 2]
+		   >>> p.scale(0)
+		   >>> p.coeffs
+		   [0]
 		'''
+		if s == 0:
+			self.coeffs = [0]
 		for i in range(len(self.coeffs)):
 			self.coeffs[i] *= s
 
@@ -253,7 +258,12 @@ class UniVarPoly:
 		   >>> p2 = p1.scaled(2)
 		   >>> p2.coeffs
 		   [4, 2]
+		   >>> p3 = p1.scaled(0)
+		   >>> p3.coeffs
+		   [0]
 		'''
+		if s == 0:
+			return UniVarPoly(0)
 		polyScaled = UniVarPoly(self)
 		polyScaled.scale(s)
 		return polyScaled

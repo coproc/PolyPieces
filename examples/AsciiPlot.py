@@ -37,7 +37,7 @@ def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True, insertSpa
 	if insertSpacesBeforeCombiningChars:
 		for c in PLOT_DOTS:
 			if unicodedata.category(c) == 'Mn':
-				plotString = plotString.replace(c, ' '+c)
+				plotString = plotString.replace(c, '\u2000'+c) # insert 'en quad' space to make dot centered horizontally
 	return plotString
 
 

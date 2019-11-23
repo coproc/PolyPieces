@@ -90,14 +90,19 @@ class UniVarPoly:
 			x0_k *= x0
 		return p_x0
 
-		
+
+	# removing leading zero coefficents
+	def _normalize(self):
+		while len(self.coeffs) > 1 and self.coeffs[-1] == 0:
+			self.coeffs = self.coeffs[:-1]
+
+
 	def _iaddCoeffs(self, coeffs):
 		for i in range(min(len(self.coeffs), len(coeffs))):
 			self.coeffs[i] += coeffs[i]
 		if len(coeffs) > len(self.coeffs):
 			self.coeffs += coeffs[len(self.coeffs):]
-		while len(self.coeffs) > 1 and self.coeffs[-1] == 0:
-			self.coeffs = self.coeffs[:-1]
+		self._normalize()
 
 
 	def _isubCoeffs(self, coeffs):

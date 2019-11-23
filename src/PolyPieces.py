@@ -89,7 +89,7 @@ class PolyPiece:
 		return PolyPieceFunc(ppl_conv)
 
 
-	def __mul__(self, pp):
+	def __xor__(self, pp):
 		return self.conv(pp)
 
 
@@ -508,7 +508,7 @@ class PolyPieceFunc:
 		fpp_conv = PolyPieceFunc()
 		for pp1 in self.polyPieces:
 			for pp2 in fpp.polyPieces:
-				fpp_conv += pp1 * pp2
+				fpp_conv += pp1.conv(pp2)
 		return fpp_conv
 
 

@@ -15,9 +15,10 @@ class PolyPiece:
 				self.interval = poly.interval
 			else:
 				try:
-					self.poly,self.interval = poly
+					poly,self.interval = poly
+					self.poly = poly if isinstance(poly,UniVarPoly) else UniVarPoly(poly)
 				except Exception:
-					raise TypeError("PolyPiece cannot be constructed from '%s'" % poly)
+					raise TypeError("PolyPiece cannot be constructed from '%s'" % [poly])
 		else:
 			self.poly = poly if isinstance(poly, UniVarPoly) else UniVarPoly(poly)
 			self.interval = interval
@@ -125,7 +126,7 @@ class PolyPieceFunc:
 			try:
 				self.polyPieces = [PolyPiece(pp) for pp in polyPieces]
 			except TypeError:
-				raise TypeError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
+				raise TypeError("piecewise polynomial function cannot be created from '%s'" % [polyPieces])
 			except Exception:
 				raise ValueError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
 		if not self._isConsistent():

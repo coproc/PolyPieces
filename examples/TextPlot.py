@@ -44,7 +44,7 @@ def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True, insertSpa
 # generate text plot (as string) for piecewise polynomial function.
 # @param fpp piecewise polynomial function (type PolyPieceFunc)
 # other parameters have same meaning as in function plot
-def plotFpp(fpp, xRange=None, yRange=None, xRes=80, yRes=20, unicodeOutput=True):
+def plotFpp(fpp, xRange=None, yRange=None, xRes=80, yRes=20, unicodeOutput=True, insertSpacesBeforeCombiningChars=None):
 	polyPieces = fpp.polyPieces
 	if xRange is None: xRange = [polyPieces[0].interval[0],polyPieces[-1].interval[1]]
-	return plot(lambda x: fpp.eval(x), xRange, yRange, xRes, yRes, unicodeOutput)
+	return plot(lambda x: fpp.eval(x), xRange, yRange, xRes, yRes, unicodeOutput, insertSpacesBeforeCombiningChars)

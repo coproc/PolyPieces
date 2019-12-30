@@ -6,7 +6,7 @@ import unicodedata
 PLOT_DOTS = ('\N{COMBINING DOT BELOW}', '.', '\N{MIDDLE DOT}', '\N{COMBINING DOT ABOVE}')
 
 
-# generate a string representing an ASCII plot
+# generate a string representing a text plot
 # @param f function to plot
 # @param xRange interval of range over which to plot as iterable (xMin, xMax)
 # @param yRange y-range for plot (default: range of f over given x-range)
@@ -41,7 +41,7 @@ def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True, insertSpa
 	return plotString
 
 
-# generate ascii plot (as string) for piecewise polynomial function.
+# generate text plot (as string) for piecewise polynomial function.
 # @param fpp piecewise polynomial function (type PolyPieceFunc)
 # other parameters have same meaning as in function plot
 def plotFpp(fpp, xRange=None, yRange=None, xRes=80, yRes=20, unicodeOutput=True):

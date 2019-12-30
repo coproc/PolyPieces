@@ -1,9 +1,17 @@
 import os
+import sys
 import unicodedata
 
 
 # dot characters in ascending heights
 PLOT_DOTS = ('\N{COMBINING DOT BELOW}', '.', '\N{MIDDLE DOT}', '\N{COMBINING DOT ABOVE}')
+
+
+# if running in windows console, select a suitable encoding for unicode output
+def adjustConsoleEncodingForUnicode():
+	if sys.stdout.isatty() and os.name == 'nt':
+		os.system('chcp 65001')
+		sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf8', buffering=1)
 
 
 # generate a string representing a text plot

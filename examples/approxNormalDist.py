@@ -37,6 +37,8 @@ def variance(fpp, expVal=None):
 	return fpp_x2.int() - expVal*expVal
 
 
+TextPlot.adjustConsoleEncodingForUnicode()
+
 d_deg0 = PolyPieceFunc(PolyPiece(Fraction(1), [0,1]))
 d_deg1 = d_deg0^d_deg0 # polynomials in d_deg1 have degree 1
 d_deg3 = d_deg1^d_deg1 # polynomials in d_deg3 have degree 3

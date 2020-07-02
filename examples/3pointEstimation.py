@@ -5,7 +5,7 @@ sys.path.append('../src')
 
 from UniVarPoly import UniVarPoly, p_x as x
 from PolyPieces import PolyPiece, PolyPieceFunc
-import AsciiPlot
+import TextPlot
 
 # generate density function of triangular distribution
 def triangDistDensity(a,b,c):
@@ -23,8 +23,10 @@ for i in range(4):
 	b = c + randint(1,7)
 	triangleDists.append(triangDistDensity(a,b,c))
 
+TextPlot.adjustConsoleEncodingForUnicode()
+
 for td in triangleDists:
-	print(AsciiPlot.plotFpp(td, [0,20], [0,1], yRes=8))
+	print(TextPlot.plotFpp(td, [0,20], [0,1], yRes=8))
 
 from functools import reduce
 densityOfSum = reduce(lambda x,y: x^y, triangleDists)
@@ -32,4 +34,4 @@ densityOfSum = reduce(lambda x,y: x^y, triangleDists)
 print('\ndensity of sum of random variables with triangular distribution')
 print(densityOfSum)
 print()
-print(AsciiPlot.plotFpp(densityOfSum))
+print(TextPlot.plotFpp(densityOfSum))

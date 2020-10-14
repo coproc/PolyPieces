@@ -452,8 +452,8 @@ class UniVarPoly:
 		'''
 		if isinstance(poly, numbers.Number):
 			return self.eval(poly)
-		poly_k = UniVarPoly(poly, varName=poly.varName)
-		polyComp = UniVarPoly([self.coeffs[0]], varName=poly.varName)
+		poly_k = UniVarPoly(poly)
+		polyComp = UniVarPoly([self.coeffs[0]], varName=poly_k.varName)
 		for k in range(1, len(self.coeffs)):
 			if k > 1: poly_k *= poly
 			polyComp += self.coeffs[k] * poly_k

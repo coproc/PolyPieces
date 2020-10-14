@@ -107,7 +107,8 @@ class PolyPieceFunc:
 	   f(x) =
 	     1, x in [0,1]
 	     0, else
-	   >>> from UniVarPoly import p_x as x
+	   >>> from UniVarPoly import symbol
+	   >>> x = symbol()
 	   >>> fpp = PolyPieceFunc(((x,[0,1]), (1-x,[1,2])))
 	   >>> print(fpp)
 	   f(x) =

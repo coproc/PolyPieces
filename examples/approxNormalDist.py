@@ -7,10 +7,12 @@ sys.path.append('../src')
 
 import math
 from fractions import Fraction
-from UniVarPoly import UniVarPoly, p_x, p_x2
+from UniVarPoly import UniVarPoly, symbol
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot
 
+p_x = symbol()
+p_x2 = p_x**2
 
 def normalDistDensity(expVal=0, sigma=1):
 	normFac = 1/math.sqrt(2*math.pi)/sigma
@@ -63,6 +65,9 @@ print("min=%f, max=%f, dev at 2=%.1f%%" % (min(devVals),max(devVals),100*ndd_dev
 
 d_deg7 = d_deg3^d_deg3
 d_deg11 = d_deg7^d_deg3
+# d_deg11 has expectation 12*expectation(d_deg0) = 12*1/2 = 6
+# d_deg11 has variance 12*variance(d_deg0) = 12*1/12 = 1
+# so for normalizing only shifting is necessary
 d_deg11_s = d_deg11.comp(p_x+Fraction(6))
 print("\napproximation of standard normal distribution of degree 11:")
 print(d_deg11_s)

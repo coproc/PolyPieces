@@ -23,8 +23,9 @@ Basic usage. For more elaborate examples see the files in `examples/`.
 
 ### Simple example with UniVarPoly
 ```python
->>> from UniVarPoly import UniVarPoly, p_x as x
+>>> from UniVarPoly import UniVarPoly, symbol
 
+>>> x = symbol()
 >>> poly = 3*x - 1
 >>> poly*poly
 <UniVarPoly '9x^2 - 6x + 1'>
@@ -57,8 +58,10 @@ f(x) =
 
 ### Exact computations
 ```python
->>> from UniVarPoly import p_1, p_x
->>> poly_rat = 5*p_x - p_1/4
+>>> from fractions import Fraction
+>>> from UniVarPoly import symbol
+>>> x = symbol()
+>>> poly_rat = 5*x - Fraction(1,4)
 >>> print(poly_rat)
 ```
 ```

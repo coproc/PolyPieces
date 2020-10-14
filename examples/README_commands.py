@@ -14,7 +14,8 @@ def _p():
 		_p_ = None
 #------------ CODE INIT ------------
 
-from UniVarPoly import UniVarPoly, p_x as x
+from UniVarPoly import UniVarPoly, symbol
+x = symbol()
 poly = 3*x - 1
 _p_= poly*poly
 _p()
@@ -25,8 +26,10 @@ print(uniformDensity)
 # compute density of the sum of two uniformly distributed random variables (by convolution)
 uniformDensitySum2 = uniformDensity.conv(uniformDensity)
 print(uniformDensitySum2)
-from UniVarPoly import p_1, p_x
-poly_rat = 5*p_x - p_1/4
+from fractions import Fraction
+from UniVarPoly import symbol
+x = symbol()
+poly_rat = 5*x - Fraction(1,4)
 print(poly_rat)
 # indefinite integral
 _p_= poly_rat.int()

@@ -10,9 +10,12 @@ sys.path.append('../src')
 
 import math
 from fractions import Fraction
-from UniVarPoly import UniVarPoly, p_x, p_x2
+from UniVarPoly import UniVarPoly, symbol
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot
+
+p_x = symbol()
+p_x2 = p_x**2
 
 # m_h is a piecewise constant function (1/(2*h) for |x| < h,  0 otherwise)
 # m_h is symmetric and the area under it is 1.
@@ -24,18 +27,24 @@ def m_h(h):
 def m_n(n):
 	if n == 0: return m_h(1),1
 	m_n1,_2n1 = m_n(n-1)
+	print(m_n1)
 	_2n = 2*_2n1
 	return m_n1^m_h(Fraction(1,_2n)),_2n
 
 
 TextPlot.adjustConsoleEncodingForUnicode()
 
-m_4,_ = m_n(4)
-print(m_4)
-print(TextPlot.plotFpp(m_4))
+m_6,_ = m_n(6)
+print(m_6)
+print(TextPlot.plotFpp(m_6))
 
 # derivates show a fractal structure
-m_4d = m_4
-for i in range(2):
-	m_4d = m_4d.der() 
-	print(TextPlot.plotFpp(m_4d))
+m_d = m_6
+derFuncs = []
+for i in range(3):
+	m_d = m_d.der() 
+	derFuncs.append(m_d)
+	print(TextPlot.plotFpp(m_d))
+
+for f in derFuncs:
+	print(f)

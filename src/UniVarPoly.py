@@ -712,10 +712,23 @@ class UniVarPoly:
 
 # create identity polynomials for given variable name (e.g. polynomial x for variable name 'x')
 def symbol(varName='x'):
+	'''generate simplest polynomials given a variable name
+	
+	>>> symbol()
+	<UniVarPoly 'x'>
+	>>> symbol('y')
+	<UniVarPoly 'y'>
+	'''
 	return UniVarPoly([0,1], varName=varName.strip())
 
 def symbols(varNames):
-	return [symbol(v) for v in varNames.split(',')]
+	'''generate several symbols in one call
+	
+	>>> x,y = symbols('x,y')
+	>>> x+y
+	<UniVarPoly 'y + x'>
+	'''
+	return [symbol(v) for v in re.split('[, \t]+', varNames)]
 
 
 if __name__ == "__main__":

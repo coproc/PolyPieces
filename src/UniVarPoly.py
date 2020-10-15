@@ -427,9 +427,30 @@ class UniVarPoly:
 		return self.__mul__(poly)
 
 
+	def _termQuot(self, div):
+		if isinstance(div, numbers.Number):
+			return self/div
+		assert isinstance(div, UniVarPoly), "internal error: unexpected div type %s" % type(div)
+		if div.deg() == 0:
+			assert isinstance(div.coeffs[0], numbers.Number), "internal error: unexpected div poly '%s' of var '%s'" % (div.coeffs[0], div.varName)
+			return self/div.coeffs[0]
+		if div.varName > self.varName:
+			raise ValueError("cannot divide '%s' by '%s'" % (self, div))
+		deg1 = self.deg()
+		deg2,div_rec = (div.deg(),div.coeffs[-1]) if div.varName == self.varName else (0,div)
+		for exp in range(deg1,deg2-1,-1):
+			ci = self.coeffs[exp]
+			if isinstance(ci, UniVarPoly):
+				return UniVarPoly((exp-deg2)*[0] + [ci._termQuot(div_rec)], self.varName)
+			assert isinstance(ci, numbers.Number), "internal error: unexpected coefficient %s (type %s)" % (ci, type(ci))
+			if isinstance(div_rec, numbers.Number):
+				if isinstance(ci, int): ci = Fraction(ci)
+				return UniVarPoly((exp-deg2)*[0] + [ci/div_rec], self.varName)
+		raise ValueError("cannot divide '%s' by '%s'" % (self, div))
+
+
 	def __truediv__(self, d):
 		'''overload operators /, /=
-		   (divisor must be number, polynomial division not implemented)
 		
 		   >>> p1 = UniVarPoly('2x-1')
 		   >>> p = p1 / 5
@@ -438,7 +459,12 @@ class UniVarPoly:
 		   >>> p /= 2
 		   >>> p.coeffs
 		   [Fraction(-1, 10), Fraction(1, 5)]
-		   >>> 
+		   >>> q = poly('x^3-1') / poly('x-1'); print(q)
+		   x^2 + x + 1
+		   >>> q,r = poly('x^3-1') / poly('x+1'); print(f'{q}, {r}')
+		   x^2 - x + 1, -2
+		   >>> q = poly('xy') / poly('2x'); print(q)
+		   1/2y
 		'''
 		if isinstance(d, numbers.Number):
 			try:
@@ -446,7 +472,18 @@ class UniVarPoly:
 			except TypeError:
 				scaleFac = 1/d
 			return self.scaled(scaleFac)
-		raise TypeError("divisor of invalid type %s (must be number)" % type(d))
+		if not isinstance(d, UniVarPoly):
+			raise TypeError("divisor of invalid type %s" % type(d))
+		quot,rem = 0,UniVarPoly(self)
+		try:
+			while True:
+				q = rem._termQuot(d)
+				quot += q
+				rem -= q*d
+				#print(q, quot, rem)
+		except ValueError:
+			pass
+		return quot if rem==0 else (quot,rem)
 
 
 	def __pow__(self, e):
@@ -485,7 +522,8 @@ class UniVarPoly:
 		for k in range(1, len(self.coeffs)):
 			if k > 1: poly_k *= poly
 			polyComp += self.coeffs[k] * poly_k
-			
+
+		polyComp._normalize()
 		return polyComp
 
 	def __call__(self, poly):
@@ -756,7 +794,10 @@ def poly(polyStr):
 	return UniVarPoly.fromString(polyStr)
 
 
-if __name__ == "__main__":
+def _selfTest():
 	import doctest
 	print('running doc tests ...')
 	doctest.testmod()
+
+if __name__ == "__main__":
+	_selfTest()

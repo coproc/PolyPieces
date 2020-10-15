@@ -539,6 +539,5 @@ class PolyPieceFunc:
 
 if __name__ == "__main__":
 	import doctest
+	print('running doc tests ...')
 	doctest.testmod()
-	#fpp = PolyPieceFunc(PolyPiece(1,[0,1]))
-	#print(fpp)

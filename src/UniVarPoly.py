@@ -52,6 +52,7 @@ class UniVarPoly:
 				iter(repr)
 				self.coeffs = list(copy.deepcopy(repr))
 				if len(self.coeffs) == 0: self.coeffs.append(0)
+				self._normalize()
 			except TypeError:
 				raise TypeError('unexpected type "%s" when constructing polynomial' % type(coeffs))
 			
@@ -101,6 +102,14 @@ class UniVarPoly:
 	def _normalize(self):
 		while len(self.coeffs) > 1 and self.coeffs[-1] == 0:
 			self.coeffs = self.coeffs[:-1]
+		for idx,c in enumerate(self.coeffs):
+			if isinstance(c, UniVarPoly):
+				c._normalize()
+				if c == 0:
+					self.coeffs[idx] = 0
+		if len(self.coeffs) == 1 and isinstance(self.coeffs[0], UniVarPoly):
+			self.varName = self.coeffs[0].varName
+			self.coeffs = self.coeffs[0].coeffs
 
 
 	def _iaddCoeffs(self, coeffs):
@@ -140,11 +149,13 @@ class UniVarPoly:
 				self._iaddCoeffs(poly.coeffs)
 			elif self.varName > poly.varName:
 				self.coeffs[0] += poly
+				self._normalize()
 			else:
 				tmp = UniVarPoly(self)
 				self.coeffs = copy.deepcopy(poly.coeffs)
 				self.varName = poly.varName
 				self.coeffs[0] += tmp			
+				self._normalize()
 		else:
 			raise ValueError("unexpected argument type " + type(poly))
 
@@ -173,12 +184,14 @@ class UniVarPoly:
 				self._isubCoeffs(poly.coeffs)
 			elif self.varName > poly.varName:
 				self.coeffs[0] -= poly
+				self._normalize()
 			else:
 				tmp = UniVarPoly(self)
 				self.coeffs = copy.deepcopy(poly.coeffs)
 				self.varName = poly.varName
 				self.scale(-1)
 				self.coeffs[0] += tmp				
+				self._normalize()
 		else:
 			raise ValueError("unexpected argument type " + type(poly))
 

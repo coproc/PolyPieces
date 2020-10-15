@@ -661,30 +661,53 @@ class UniVarPoly:
 		return "<UniVarPoly '%s'>" % self
 
 
-	def _eqCoeffs(self, coeffs, eps):
-		if len(self.coeffs) != len(coeffs): return False
-		for i,c in enumerate(self.coeffs):
-			if abs(c-coeffs[i]) > eps: return False
+	@staticmethod
+	def _eqCoeffs(coeffs1, coeffs2, eps):
+		if len(coeffs1) != len(coeffs2): return False
+		for c1,c2 in zip(coeffs1, coeffs2):
+			if isinstance(c1, numbers.Number):
+				if isinstance(c2, numbers.Number):
+					if eps is None and (isinstance(c1, float) or isinstance(c2, float)):
+						eps = 1e-10
+					ceq = c1 == c2 if eps is None or eps == 0 else abs(c1 - c2) < eps
+					if not ceq: return False
+				elif isinstance(c2, UniVarPoly):
+					if not c2.__eq__(c1, eps): return False
+				else:
+					raise ValueError("_eqCoeffs: unexpected coefficient type " + type(c2))
+			elif isinstance(c1, UniVarPoly):
+				if not c1.__eq__(c2, eps): return False
+			else:
+				raise ValueError("_eqCoeffs: unexpected coefficient type " + type(c1))
 		return True
 
 
 	def __eq__(self, poly, eps=None):
+		'''overload operator ==
+		unset eps defaults to 1e-10 if floats are involved, exact comparison otherwise
+		
+		>>> UniVarPoly(0) == 0
+		True
+		>>> UniVarPoly(1) == 1
+		True
+		>>> UniVarPoly('x') == 0
+		False
+		>>> UniVarPoly('x') == symbol('x')
+		True
+		>>> symbol('x') == symbol('y')
+		False
+		'''
 		if isinstance(poly, numbers.Number):
-			if len(self.coeffs) > 1: return False
-			c0 = self.coeffs[0]
-			if isinstance(c0, numbers.Number):
-				if isinstance(c0, float) or isinstance(poly, float):
-					if eps is None: eps = 1e-10
-					return abs(c0 - poly) < eps
-				return c0 == poly
-			return c0.__eq__(poly, eps)
+			return UniVarPoly._eqCoeffs(self.coeffs, [poly], eps)
 		if isinstance(poly, list):
 			coeffs = poly
 		elif isinstance(poly, UniVarPoly):
+			if self.varName != poly.varName and max(len(self.coeffs), len(poly.coeffs)) > 1:
+				return False
 			coeffs = poly.coeffs
 		else:
-			raise ValueError("unexpected argument type " + type(poly))
-		return self._eqCoeffs(coeffs, eps)
+			raise ValueError("__eq__: unexpected argument type " + type(poly))
+		return UniVarPoly._eqCoeffs(self.coeffs, coeffs, eps)
 
 
 # create identity polynomials for given variable name (e.g. polynomial x for variable name 'x')

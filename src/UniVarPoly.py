@@ -69,6 +69,7 @@ class UniVarPoly:
 		'''
 		if varNames is None:
 			varNames = set(re.findall('[a-zA-Z][0-9]*', exprStr))
+		exprStr = exprStr.replace('^', '**')
 		return eval(exprStr, None, {v: symbol(v) for v in varNames})
 
 

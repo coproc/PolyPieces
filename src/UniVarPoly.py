@@ -292,7 +292,7 @@ class UniVarPoly:
 		'''
 		if s == 0:
 			return UniVarPoly(0, varName=self.varName)
-		polyScaled = UniVarPoly(self, varName=self.varName)
+		polyScaled = UniVarPoly(self)
 		polyScaled.scale(s)
 		return polyScaled
 
@@ -376,6 +376,7 @@ class UniVarPoly:
 		'''
 		polyMul = self.__mul__(poly)
 		self.coeffs = polyMul.coeffs
+		self.varName = polyMul.varName
 
 		
 	def __imul__(self, poly):

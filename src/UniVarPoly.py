@@ -459,12 +459,12 @@ class UniVarPoly:
 		   >>> p /= 2
 		   >>> p.coeffs
 		   [Fraction(-1, 10), Fraction(1, 5)]
-		   >>> q = poly('x^3-1') / poly('x-1'); print(q)
-		   x^2 + x + 1
+		   >>> q,r = poly('x^3-1') / poly('x-1'); print(f'{q}, {r}')
+		   x^2 + x + 1, 0
 		   >>> q,r = poly('x^3-1') / poly('x+1'); print(f'{q}, {r}')
 		   x^2 - x + 1, -2
-		   >>> q = poly('xy') / poly('2x'); print(q)
-		   1/2y
+		   >>> q,r = poly('xy') / poly('2x'); print(f'{q}, {r}')
+		   1/2y, 0
 		'''
 		if isinstance(d, numbers.Number):
 			try:
@@ -480,10 +480,9 @@ class UniVarPoly:
 				q = rem._termQuot(d)
 				quot += q
 				rem -= q*d
-				#print(q, quot, rem)
 		except ValueError:
 			pass
-		return quot if rem==0 else (quot,rem)
+		return quot,rem
 
 
 	def __pow__(self, e):

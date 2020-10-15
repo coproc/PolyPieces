@@ -66,10 +66,18 @@ class UniVarPoly:
 		   [-1, 3, -3, 1]
 		   >>> p.varName
 		   'y'
+		   >>> UniVarPoly.fromString('x^2')
+		   <UniVarPoly 'x^2'>
+		   >>> UniVarPoly.fromString('2xy')
+		   <UniVarPoly '2xy'>
+		   >>> UniVarPoly.fromString('(x+y)(x-y)')
+		   <UniVarPoly '-y^2 + x^2'>
 		'''
 		if varNames is None:
 			varNames = set(re.findall('[a-zA-Z][0-9]*', exprStr))
 		exprStr = exprStr.replace('^', '**')
+		for _ in range(2): # regular expressions may overlap
+			exprStr = re.sub(r'([a-zA-Z0-9)])[ \t]*([(a-zA-Z])', r'\1*\2', exprStr)
 		return eval(exprStr, None, {v: symbol(v) for v in varNames})
 
 
@@ -734,4 +742,5 @@ def symbols(varNames):
 
 if __name__ == "__main__":
 	import doctest
+	print('running doc tests ...')
 	doctest.testmod()

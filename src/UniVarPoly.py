@@ -61,23 +61,27 @@ class UniVarPoly:
 	def fromString(exprStr, varNames=None):
 		'''create univariate polynomial from expression string
 		
-		   >>> p = UniVarPoly.fromString('(y-1)**3')
+		   >>> p = poly('(y-1)**3')
 		   >>> p.coeffs
 		   [-1, 3, -3, 1]
 		   >>> p.varName
 		   'y'
-		   >>> UniVarPoly.fromString('x^2')
+		   >>> poly('x^2')
 		   <UniVarPoly 'x^2'>
-		   >>> UniVarPoly.fromString('2xy')
+		   >>> poly('2xy')
 		   <UniVarPoly '2xy'>
-		   >>> UniVarPoly.fromString('(x+y)(x-y)')
+		   >>> poly('(x+y)(x-y)')
 		   <UniVarPoly '-y^2 + x^2'>
+		   >>> poly('x-1/2')
+		   <UniVarPoly 'x - 1/2'>
 		'''
 		if varNames is None:
 			varNames = set(re.findall('[a-zA-Z][0-9]*', exprStr))
 		exprStr = exprStr.replace('^', '**')
-		for _ in range(2): # regular expressions may overlap
+		for _ in range(2): # regular expressions for implicit multiplication may overlap
 			exprStr = re.sub(r'([a-zA-Z0-9)])[ \t]*([(a-zA-Z])', r'\1*\2', exprStr)
+		# assume exact arithmetic: division of integers is taken as Fraction;
+		exprStr = re.sub(r'([1-9][0-9]*)\s*/\s*([1-9][0-9]*)', r'Fraction(\1,\2)', exprStr)
 		return eval(exprStr, None, {v: symbol(v) for v in varNames})
 
 
@@ -427,13 +431,14 @@ class UniVarPoly:
 		'''overload operators /, /=
 		   (divisor must be number, polynomial division not implemented)
 		
-		   >>> p1 = UniVarPoly([-1,2])
+		   >>> p1 = UniVarPoly('2x-1')
 		   >>> p = p1 / 5
 		   >>> p.coeffs
 		   [Fraction(-1, 5), Fraction(2, 5)]
 		   >>> p /= 2
 		   >>> p.coeffs
 		   [Fraction(-1, 10), Fraction(1, 5)]
+		   >>> 
 		'''
 		if isinstance(d, numbers.Number):
 			try:
@@ -738,6 +743,17 @@ def symbols(varNames):
 	<UniVarPoly 'y + x'>
 	'''
 	return [symbol(v) for v in re.split('[, \t]+', varNames)]
+
+
+def poly(polyStr):
+	'''generate polynomial from string
+	
+	>>> poly('x')
+	<UniVarPoly 'x'>
+	>>> poly('(x+y)^2')
+	<UniVarPoly 'y^2 + 2xy + x^2'>
+	'''
+	return UniVarPoly.fromString(polyStr)
 
 
 if __name__ == "__main__":

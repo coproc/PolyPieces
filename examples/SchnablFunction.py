@@ -52,5 +52,5 @@ for i in range(3):
 	derFuncs.append(m_d)
 	print(TextPlot.plotFpp(m_d))
 
-for f in derFuncs:
-	print(f)
+#for f in derFuncs:
+#	print(f)

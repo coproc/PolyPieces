@@ -1,8 +1,14 @@
-'''generate a series of piecewise polynomial functions converging to a bell-shaped
-   function with rare properties:
+'''
+This series of converging functions was presented by Univ.Prof. Dr. Roman Schnabl
+as a 30-years anniversary lecture at TU Wien on October 1st, 2019.
+The audience were the students starting their studies of Technical Mathematics at TU Wien in October 1989.
+The presented series of functions and the surprising properties of the limit function have probably
+been discovered by Prof. Schnabl himself.
+
+generate a series of piecewise polynomial functions converging to a bell-shaped
+function with surprising and rare properties:
    - it has non-zero values only in ]-2,2[, but is arbitrarily often differentiable over R
    - its derivative consists of two copies of itself
-   We do exact computations by using coefficients of type fractions.Fraction.
 '''
 import os
 import sys
@@ -18,7 +24,8 @@ p_x = symbol()
 p_x2 = p_x**2
 
 # m_h is a piecewise constant function (1/(2*h) for |x| < h,  0 otherwise)
-# m_h is symmetric and the area under it is 1.
+# m_h is non-negative, symmetric and the area under it is 1.
+# We do exact computations by using coefficients of type fractions.Fraction.
 def m_h(h):
 	return PolyPieceFunc(PolyPiece(Fraction(1,2*h), [-h,h]))
 
@@ -34,6 +41,7 @@ def m_n(n):
 
 TextPlot.adjustConsoleEncodingForUnicode()
 
+# since the series of functions is converging quickly, m_6 is already very close to the limit function.
 m_6,_ = m_n(6)
 print(m_6)
 print(TextPlot.plotFpp(m_6))

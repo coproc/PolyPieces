@@ -16,12 +16,10 @@ sys.path.append('../src')
 
 import math
 from fractions import Fraction
-from UniVarPoly import UniVarPoly, symbol
+from UniVarPoly import UniVarPoly
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot
 
-p_x = symbol()
-p_x2 = p_x**2
 
 # m_h is a piecewise constant function (1/(2*h) for |x| < h,  0 otherwise)
 # m_h is non-negative, symmetric and the area under it is 1.

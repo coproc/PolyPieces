@@ -40,20 +40,21 @@ def m_n(n, showIntermediateResults=False):
 	return m_i
 
 
-TextPlot.adjustConsoleEncodingForUnicode()
+if __name__ == '__main__':
+	TextPlot.adjustConsoleEncodingForUnicode()
 
-# since the series of functions is converging quickly, m_6 is already very close to the limit function.
-m_6 = m_n(6, True)
-print(m_6)
-print(TextPlot.plotFpp(m_6))
+	# since the series of functions is converging quickly, m_6 is already very close to the limit function.
+	m_6 = m_n(6, True)
+	print(m_6)
+	print(TextPlot.plotFpp(m_6))
 
-# derivates show a fractal structure
-m_d = m_6
-derFuncs = []
-for i in range(3):
-	m_d = m_d.der() 
-	derFuncs.append(m_d)
-	print(TextPlot.plotFpp(m_d))
+	# derivates show a fractal structure
+	m_d = m_6
+	derFuncs = []
+	for i in range(3):
+		m_d = m_d.der() 
+		derFuncs.append(m_d)
+		print(TextPlot.plotFpp(m_d))
 
-#for f in derFuncs:
-#	print(f)
+	#for f in derFuncs:
+	#	print(f)

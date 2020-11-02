@@ -29,6 +29,8 @@ Basic usage. For more elaborate examples see the files in `examples/`.
 >>> poly = 3*x - 1
 >>> poly*poly
 <UniVarPoly '9x^2 - 6x + 1'>
+>>> print(poly**3)
+27x^3 - 27x^2 + 9x - 1
 ```
 
 ### Simple example with PolyPieceFunc

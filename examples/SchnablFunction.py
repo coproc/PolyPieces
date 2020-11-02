@@ -10,9 +10,10 @@ function with surprising and rare properties:
    - it has non-zero values only in ]-2,2[, but is arbitrarily often differentiable over R
    - its derivative consists of two copies of itself
 '''
-import os
+from pathlib import Path
+SRC_DIR = Path(__file__).parent.parent / 'src'
 import sys
-sys.path.append('../src')
+sys.path.append(str(SRC_DIR.resolve()))
 
 import math
 from fractions import Fraction
@@ -29,18 +30,20 @@ def m_h(h):
 
 
 # m_n is the convolution of the functions m_1, m_(1/2), ... m_(1/2^n)
-def m_n(n):
-	if n == 0: return m_h(1),1
-	m_n1,_2n1 = m_n(n-1)
-	print(m_n1)
-	_2n = 2*_2n1
-	return m_n1^m_h(Fraction(1,_2n)),_2n
+def m_n(n, showIntermediateResults=False):
+	m_i = m_h(1)
+	_2i = 1 # powers of 2
+	for _ in range(n):
+		if showIntermediateResults: print(m_i)
+		_2i *= 2
+		m_i = m_i ^ m_h(Fraction(1,_2i))
+	return m_i
 
 
 TextPlot.adjustConsoleEncodingForUnicode()
 
 # since the series of functions is converging quickly, m_6 is already very close to the limit function.
-m_6,_ = m_n(6)
+m_6 = m_n(6, True)
 print(m_6)
 print(TextPlot.plotFpp(m_6))
 

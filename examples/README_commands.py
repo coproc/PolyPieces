@@ -19,7 +19,9 @@ x = symbol()
 poly = 3*x - 1
 _p_= poly*poly
 _p()
-print(poly**3)
+poly_3 = poly**3; print(poly_3)
+_p_= poly_3(1)
+_p()
 from PolyPieces import PolyPiece, PolyPieceFunc
 # define density for uniform distribution over the interval [0,1]
 uniformDensity = PolyPieceFunc(PolyPiece(1, [0,1]))

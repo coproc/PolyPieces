@@ -85,13 +85,16 @@ class UniVarPoly:
 		return eval(exprStr, None, {v: symbol(v) for v in varNames})
 
 
-	def deg(self):
+	def deg(self, varName=None):
 		'''degree of polynomial
 		
 		   >>> UniVarPoly([0, 1, 1]).deg()
 		   2
 		'''
-		return len(self.coeffs) - 1
+		if varName is None or varName == self.varName:
+			return len(self.coeffs) - 1
+		if varName < self.varName: return 0 # optimization
+		return max([c.deg(varName) for c in self.coeffs if isinstance(c, UniVarPoly)], default=0)
 
 
 	def eval(self, x0):

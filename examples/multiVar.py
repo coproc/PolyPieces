@@ -3,8 +3,12 @@ Multivariate polynomials can be represented as nested UniVarPoly (i.e. the coeff
 The lexicographic ordering of the variables is assumed to be ascending when going from the inner most polynomials
 to the outer levels.
 '''
+import os
 import sys
-sys.path.append('../src')
+
+SCRIPT_DIR = os.path.split(os.path.abspath(__file__))[0]
+SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR,'../src'))
+sys.path.append(SRC_DIR)
 from UniVarPoly import UniVarPoly as UP, symbol, symbols
 
 def dbgPoly(poly):
@@ -14,28 +18,31 @@ x,y = symbols('x,y')
 
 p1 = 1-x
 p2 = 1-y
-print('p1:', p1,', p2:',p2)
+print('p1:', p1,', p2:', p2)
+print('deg(p1):', p1.deg(),', deg(p2):', p2.deg())
+print('deg(p1, "x"):', p1.deg("x"),', deg(p1, "y"):', p1.deg("y"))
+print('deg(p2, "x"):', p2.deg("x"),', deg(p2, "y"):', p2.deg("y"))
 
 p1p2 = p1+p2
 dbgPoly(p1p2)
-print('p1:', p1,', p2:',p2)
+print('p1:', p1,', p2:', p2)
 
 p2d1 = p2-p1
 dbgPoly(p2d1)
-print('p1:', p1,', p2:',p2)
+print('p1:', p1,', p2:', p2)
 
 p1d2 = p1-p2
 dbgPoly(p1d2)
-print('p1:', p1,', p2:',p2)
+print('p1:', p1,', p2:', p2)
 
 p0 = p1d2+p2d1
 dbgPoly(p0)
 print('equals 0:', p0 == 0)
-print('p1:', p1,', p2:',p2)
+print('p1:', p1,', p2:', p2)
 
 p1m2 = p1*p2
 dbgPoly(p1m2)
-print('p1:', p1,', p2:',p2)
+print('p1:', p1,', p2:', p2)
 
 z = symbol('z')
 ps = x+y+z

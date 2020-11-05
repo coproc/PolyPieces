@@ -121,8 +121,9 @@ class UniVarPoly:
 		for idx,c in enumerate(self.coeffs):
 			if isinstance(c, UniVarPoly):
 				c._normalize()
-				if c == 0:
-					self.coeffs[idx] = 0
+				if c.deg() == 0:
+					assert len(c.coeffs) <= 1
+					self.coeffs[idx] = 0 if len(c.coeffs) == 0 else c.coeffs[0]
 		if len(self.coeffs) == 1 and isinstance(self.coeffs[0], UniVarPoly):
 			self.varName = self.coeffs[0].varName
 			self.coeffs = self.coeffs[0].coeffs
@@ -519,11 +520,19 @@ class UniVarPoly:
 		'''
 		if isinstance(poly, numbers.Number):
 			return self.eval(poly)
-		poly_k = UniVarPoly(poly)
-		polyComp = UniVarPoly([self.coeffs[0]], varName=poly_k.varName)
+		if isinstance(poly, dict) and not self.varName in poly:
+			coeffsComp = [c.comp(poly) if isinstance(c, UniVarPoly) else c for c in self.coeffs]
+			return UniVarPoly(coeffsComp, varName=self.varName)
+		poly_var = UniVarPoly(poly[self.varName]) if isinstance(poly, dict) else UniVarPoly(poly)
+		poly_k = poly_var
+		def _subs(expr, s):
+			return expr.comp(s) if isinstance(expr, UniVarPoly) and isinstance(s, dict) else expr
+		c_0 = _subs(self.coeffs[0], poly)
+		polyComp = UniVarPoly([c_0], varName=poly_var.varName)
 		for k in range(1, len(self.coeffs)):
-			if k > 1: poly_k *= poly
-			polyComp += self.coeffs[k] * poly_k
+			if k > 1: poly_k *= poly_var
+			c_k = _subs(self.coeffs[k], poly)
+			polyComp += c_k * poly_k
 
 		polyComp._normalize()
 		return polyComp
@@ -557,12 +566,13 @@ class UniVarPoly:
 			
 			coeffsDer = [(i+1)*c for i,c in enumerate(self.coeffs[1:])]
 			return UniVarPoly(coeffsDer, varName=self.varName)
-		if varName > self.varName: return UniVarPoly(varName=varName)
+		if varName > self.varName:
+			return UniVarPoly(varName=varName)
 		coeffsDer = [c.der(varName) if isinstance(c, UniVarPoly) else 0 for c in self.coeffs]
 		return UniVarPoly(coeffsDer, varName=self.varName)
 
 
-	def int(self, interval=None):
+	def int(self, interval=None, varName=None):
 		'''compute indefinite or definite integral of polynomial
 		
 		   >>> p = UniVarPoly([0, 1])
@@ -572,32 +582,38 @@ class UniVarPoly:
 		   Fraction(1, 2)
 		'''
 		if interval is None:
-			return self.intIndef()
-		return self.intDef(interval)
+			return self.intIndef(varName)
+		return self.intDef(interval, varName)
 
 		
-	def intDef(self, interval):
+	def intDef(self, interval, varName=None):
 		'''definite integral.
 
 		   >>> p = UniVarPoly([0, 1])
 		   >>> p.intDef([0,1])
 		   Fraction(1, 2)
 		'''
-		pIntIndef = self.intIndef()
-		return pIntIndef.eval(interval[1]) - pIntIndef.eval(interval[0])
+		pIntIndef = self.intIndef(varName)
+		lower,upper = interval if varName is None else [{varName: val} for val in interval]
+		return pIntIndef.comp(upper) - pIntIndef.comp(lower)
 
 
-	def intIndef(self):
+	def intIndef(self, varName=None):
 		'''indefinite integral
 
 		   >>> p1 = UniVarPoly([1, 1])
 		   >>> p1.intIndef().coeffs
 		   [0, 1, Fraction(1, 2)]
 		'''
-		c0 = self.coeffs[0]
-		# make new coefficient (0) the same type as existing ones
-		# save division by 1
-		coeffsInt = [c0-c0, c0] + [self.coeffs[i]*Fraction(1,i+1) for i in range(1, len(self.coeffs))]
+		if varName is None or varName == self.varName:
+			c0 = self.coeffs[0]
+			# make new coefficient (0) the same type as existing ones
+			# save division by 1
+			coeffsInt = [c0-c0, c0] + [self.coeffs[i]*Fraction(1,i+1) for i in range(1, len(self.coeffs))]
+			return UniVarPoly(coeffsInt, varName=self.varName)
+		if varName > self.varName:
+			return UniVarPoly([0, self], varName=varName)
+		coeffsInt = [c.intIndef(varName) if isinstance(c, UniVarPoly) else UniVarPoly([0, c], varName=varName) for c in self.coeffs]
 		return UniVarPoly(coeffsInt, varName=self.varName)
 
 

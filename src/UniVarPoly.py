@@ -543,7 +543,7 @@ class UniVarPoly:
 		return self.comp(poly)
 
 
-	def der(self):
+	def der(self, varName=None):
 		'''compute derivative of polynomial
 		
 		   >>> p = UniVarPoly([0, 0, 1])
@@ -551,10 +551,14 @@ class UniVarPoly:
 		   >>> pd.coeffs
 		   [0, 2]
 		'''
-		# derivative of constant polynomial is the zero polynomial
-		if len(self.coeffs) == 1: return UniVarPoly(varName=self.varName)
-		
-		coeffsDer = [(i+1)*c for i,c in enumerate(self.coeffs[1:])]
+		if varName is None or varName == self.varName:
+			# derivative of constant polynomial is the zero polynomial
+			if len(self.coeffs) == 1: return UniVarPoly(varName=self.varName)
+			
+			coeffsDer = [(i+1)*c for i,c in enumerate(self.coeffs[1:])]
+			return UniVarPoly(coeffsDer, varName=self.varName)
+		if varName > self.varName: return UniVarPoly(varName=varName)
+		coeffsDer = [c.der(varName) if isinstance(c, UniVarPoly) else 0 for c in self.coeffs]
 		return UniVarPoly(coeffsDer, varName=self.varName)
 
 

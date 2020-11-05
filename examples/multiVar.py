@@ -19,9 +19,14 @@ x,y = symbols('x,y')
 p1 = 1-x
 p2 = 1-y
 print('p1:', p1,', p2:', p2)
-print('deg(p1):', p1.deg(),', deg(p2):', p2.deg())
+# degree
+print('deg(p1):',      p1.deg(),   ', deg(p2):',      p2.deg())
 print('deg(p1, "x"):', p1.deg("x"),', deg(p1, "y"):', p1.deg("y"))
 print('deg(p2, "x"):', p2.deg("x"),', deg(p2, "y"):', p2.deg("y"))
+# derivative
+print('der(p1):',      p1.der(),   ', der(p2):',      p2.der())
+print('der(p1, "x"):', p1.der("x"),', der(p1, "y"):', p1.der("y"))
+print('der(p2, "x"):', p2.der("x"),', der(p2, "y"):', p2.der("y"))
 
 p1p2 = p1+p2
 dbgPoly(p1p2)

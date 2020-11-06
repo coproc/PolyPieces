@@ -618,7 +618,7 @@ class UniVarPoly:
 
 
 	@staticmethod
-	def _coeffRepr(c, prec=None, signedZero=False, parenthesizeCoeffs=False, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
+	def _coeffRepr(c, prec=None, signedZero=False, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
 		'''minimal string representation of coefficient with given number of (max.) decimals.
 		   Trailing zero decimals and a trailing decimal separator '.' are removed.
 		   default precision: full precision
@@ -631,7 +631,7 @@ class UniVarPoly:
 		   '1'
 		'''
 		if isinstance(c, Fraction): return str(c)
-		if isinstance(c, UniVarPoly): return c.format(parenthesizeCoeffs=parenthesizeCoeffs, coeffPrec=prec, opMul=opMul, opPow=opPow, termOrderAsc=termOrderAsc, termSep=termSep)
+		if isinstance(c, UniVarPoly): return c.format(coeffPrec=prec, opMul=opMul, opPow=opPow, termOrderAsc=termOrderAsc, termSep=termSep)
 		cFormat = '%f' if prec is None else ('%%.%df' % prec)
 		cRepr = cFormat % c
 		if '.' in cRepr:
@@ -645,7 +645,7 @@ class UniVarPoly:
 		return cRepr
 
 
-	def format(self, parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
+	def format(self, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
 		'''generate string representation of polynomial
 
 		   >>> UniVarPoly().format()
@@ -670,8 +670,6 @@ class UniVarPoly:
 		   '-x'
 		   >>> UniVarPoly([2,0,-2], 'y').format()
 		   '-2y^2 + 2'
-		   >>> UniVarPoly([2,0,-2]).format(parenthesizeCoeffs=True)
-		   '(-2)x^2 + 2'
 		   >>> UniVarPoly([0.0001,0.9999]).format(coeffPrec=3)
 		   'x'
 		   >>> UniVarPoly([2,2,-1]).format(opMul='*')
@@ -688,29 +686,27 @@ class UniVarPoly:
 		for i in range(idxStart, idxEnd, idxIncr):
 			ci = self.coeffs[i]
 			isHighestPower = i == self.deg()
-			ciRepr = UniVarPoly._coeffRepr(ci, coeffPrec, signedZero=isHighestPower, parenthesizeCoeffs=parenthesizeCoeffs, opMul=opMul, opPow=opPow, termOrderAsc=termOrderAsc, termSep=termSep)
+			ciRepr = UniVarPoly._coeffRepr(ci, coeffPrec, signedZero=isHighestPower, opMul=opMul, opPow=opPow, termOrderAsc=termOrderAsc, termSep=termSep)
 			if ciRepr == '0': continue
 			coeffShown = False
 			if strRepr:
-				extractMinus = not parenthesizeCoeffs and isinstance(ci, numbers.Real) and ciRepr[0] == '-'
+				extractMinus = isinstance(ci, numbers.Real) and ciRepr[0] == '-'
 				if extractMinus: ciRepr = ciRepr[1:]
 				termComb = '-' if extractMinus else '+'
 				strRepr += '%s%s%s' % (termSep, termComb, termSep)
 				if ciRepr != '1' or i == 0:
-					if (parenthesizeCoeffs and (not isinstance(ci, numbers.Real) or ci < 0)) or (isinstance(ci, UniVarPoly) and ('+' in ciRepr or '-' in ciRepr) and (i>0 or ciRepr.startswith('-'))):
+					if isinstance(ci, UniVarPoly) and ('+' in ciRepr or '-' in ciRepr) and (i>0 or ciRepr.startswith('-')):
 						strRepr += '(%s)' % ciRepr
 					else:
 						strRepr += ciRepr
 					coeffShown = True
 			else:
 				if ciRepr != '1' or i == 0:
-					if (parenthesizeCoeffs and ciRepr != '1') or (isinstance(ci, UniVarPoly) and ('+' in ciRepr or '-' in ciRepr) and i > 0):
+					if isinstance(ci, UniVarPoly) and ('+' in ciRepr or '-' in ciRepr) and i > 0:
 						strRepr = '(%s)' % ciRepr
 						coeffShown = True
 					elif ciRepr == '-1' and i>0:
 						strRepr = '-'
-					elif ciRepr == '1' and i>0:
-						strRepr = ''
 					else:
 						strRepr = ciRepr
 						coeffShown = True
@@ -728,7 +724,7 @@ class UniVarPoly:
 		   >>> str(UniVarPoly([-1, 1]))
 		   'x - 1'
 		'''
-		return self.format(parenthesizeCoeffs=False, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' ')
+		return self.format(coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' ')
 
 
 	def __repr__(self):

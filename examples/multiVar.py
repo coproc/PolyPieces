@@ -74,5 +74,5 @@ print(ps2(3))
 print(ps2(3)(2))
 print(ps2(3)(2)(1))
 
-pxyz = UP.fromString('x*y*z')
+pxyz = UP.fromString('-x*y*z')
 dbgPoly(pxyz)

@@ -690,19 +690,20 @@ class UniVarPoly:
 			if ciRepr == '0': continue
 			coeffShown = False
 			if strRepr:
-				extractMinus = isinstance(ci, numbers.Real) and ciRepr[0] == '-'
+				extractMinus = ciRepr[0] == '-' and (isinstance(ci, numbers.Real) or not ('+' in ciRepr[1:] or '-' in ciRepr[1:]))
 				if extractMinus: ciRepr = ciRepr[1:]
 				termComb = '-' if extractMinus else '+'
 				strRepr += '%s%s%s' % (termSep, termComb, termSep)
 				if ciRepr != '1' or i == 0:
-					if isinstance(ci, UniVarPoly) and ('+' in ciRepr or '-' in ciRepr) and (i>0 or ciRepr.startswith('-')):
+					parenthesizeCoeff = isinstance(ci, UniVarPoly) and not extractMinus and ('+' in ciRepr or '-' in ciRepr) and (i>0 or ciRepr.startswith('-'))
+					if parenthesizeCoeff:
 						strRepr += '(%s)' % ciRepr
 					else:
 						strRepr += ciRepr
 					coeffShown = True
 			else:
 				if ciRepr != '1' or i == 0:
-					if isinstance(ci, UniVarPoly) and ('+' in ciRepr or '-' in ciRepr) and i > 0:
+					if isinstance(ci, UniVarPoly) and ('+' in ciRepr or '-' in ciRepr[1:]) and i > 0:
 						strRepr = '(%s)' % ciRepr
 						coeffShown = True
 					elif ciRepr == '-1' and i>0:

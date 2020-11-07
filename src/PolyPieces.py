@@ -29,6 +29,21 @@ class PolyPiece:
 
 
 	def conv(self, pp):
+		'''compute convolution
+		   >>> pp0 = PolyPiece(1, [0,1])
+		   >>> print(pp0.conv(pp0))
+		   f(x) =
+		     x,      x in [0,1]
+		     -x + 2, x in [1,2]
+		     0, else
+		   >>> p_x = UniVarPoly([0, 1])
+		   >>> pp1 = PolyPiece(p_x, [0,1])
+		   >>> print(pp1.conv(pp1))
+		   f(x) =
+		     1/6x^3,            x in [0,1]
+		     -1/6x^3 + x - 2/3, x in [1,2]
+		     0, else
+		'''
 		if self.poly.deg() < pp.poly.deg():
 			return pp.conv(self)
 
@@ -65,11 +80,10 @@ class PolyPiece:
 			xLimits.append(a1+b2)
 		tIntervals.append([[-b2,1], b1])
 		xLimits.append(b1+b2)
-		#print(xLimits)
 
 		# (f*g)(x) = int f(t)*g(x-t) dt = F(t)*g(x-t)_a1_x-a2 + int F(t)*g'(x-t) 
-		#         = F(t)*g(x-t) + F2(t)*g'(x-t) + int F2(t)*g''(x-t) | a1 .. x-a2 =
-		#		 = F(x-a2)*g(a2) + ... - (F(a1)*g(x-a1) + ...)
+		#          = F(t)*g(x-t) + F2(t)*g'(x-t) + int F2(t)*g''(x-t) | a1 .. x-a2 =
+		#          = F(x-a2)*g(a2) + ... - (F(a1)*g(x-a1) + ...)
 		p2_dk = pp.poly
 		if p2_dk == 0: return PolyPieceFunc()
 		p1int_k = self.poly.int()
@@ -271,6 +285,12 @@ class PolyPieceFunc:
 			fppComp.polyPieces.append(PolyPiece(pp.poly.comp(p), [(a-d)*scaleFacIntv,(b-d)*scaleFacIntv]))
 			
 		return fppComp
+
+
+	def __call__(self, poly):
+		'''overload call operator (composition/substitution/evaluation)
+		'''
+		return self.comp(poly)
 
 
 	# for debugging purposes
@@ -505,6 +525,39 @@ class PolyPieceFunc:
 
 
 	def conv(self, fpp):
+		'''compute convolution int(-inf,inf) f(t)g(x-t)dt
+
+		   >>> pdf0 = PolyPieceFunc(PolyPiece(1,[0,1]))
+		   >>> pdf1 = pdf0.conv(pdf0)
+		   >>> print(pdf1)
+		   f(x) =
+		     x,      x in [0,1]
+		     -x + 2, x in [1,2]
+		     0, else
+		   >>> pdf2 = pdf1.conv(pdf0)
+		   >>> print(pdf2)
+		   f(x) =
+		     1/2x^2,            x in [0,1]
+		     -x^2 + 3x - 3/2,   x in [1,2]
+		     1/2x^2 - 3x + 9/2, x in [2,3]
+		     0, else
+		   >>> ', '.join([str(pdf2(x)) for x in [0,1,2,3]])
+		   '0, 1/2, 1/2, 0'
+		   >>> pdf2.int([0,4])
+		   1
+		   >>> pdf3 = pdf1.conv(pdf1)
+		   >>> print(pdf3)
+		   f(x) =
+		     1/6x^3,                     x in [0,1]
+		     -1/2x^3 + 2x^2 - 2x + 2/3,  x in [1,2]
+		     1/2x^3 - 4x^2 + 10x - 22/3, x in [2,3]
+		     -1/6x^3 + 2x^2 - 8x + 32/3, x in [3,4]
+		     0, else
+		   >>> pdf3.int([0,4])
+		   1
+
+		   >> [pdf3(x) for x in [0,1,2,3,4]]
+		'''
 		# (Sum_i fi) * (Sum_i gi) = Sum_i Sum_j fi * gj
 		fpp_conv = PolyPieceFunc()
 		for pp1 in self.polyPieces:

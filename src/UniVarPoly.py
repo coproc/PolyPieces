@@ -523,7 +523,8 @@ class UniVarPoly:
 		if isinstance(poly, dict) and not self.varName in poly:
 			coeffsComp = [c.comp(poly) if isinstance(c, UniVarPoly) else c for c in self.coeffs]
 			return UniVarPoly(coeffsComp, varName=self.varName)
-		poly_var = UniVarPoly(poly[self.varName]) if isinstance(poly, dict) else UniVarPoly(poly)
+		varName = poly.varName if isinstance(poly, UniVarPoly) else self.varName
+		poly_var = UniVarPoly(poly[self.varName], varName=varName) if isinstance(poly, dict) else UniVarPoly(poly, varName=varName)
 		poly_k = poly_var
 		def _subs(expr, s):
 			return expr.comp(s) if isinstance(expr, UniVarPoly) and isinstance(s, dict) else expr

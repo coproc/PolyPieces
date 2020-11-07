@@ -29,6 +29,7 @@ print('p1(p2):', p1(p2), ', p2(p1):', p2(p1))
 print('p1(0):',  p1(0),  ', p1(1):',  p1(1))
 print('p1({x:1,y:2}):',  p1({'x':1,'y':2}), ', p2({x:y,y:2}):', p2({'x':1,'y':2}))
 print('p1({x:y}):',      p1({'x':y}),       ', p2({x:y}):',     p2({'x':y}))
+print('p1({y:x}):',      p1({'y':x}),       ', p2({y:x}):',     p2({'y':x}))
 # derivative
 print('der(p1):',      p1.der(),   ', der(p2):',      p2.der())
 print('der(p1, "x"):', p1.der("x"),', der(p1, "y"):', p1.der("y"))
@@ -41,29 +42,28 @@ print('int(p2, "x"):', p2.intIndef("x"),', int(p2, "y"):', p2.intIndef("y"))
 p1p2 = p1+p2
 print('p1+p2: ', end='')
 dbgPoly(p1p2)
-print('p1:', p1,', p2:', p2)
 
 p2d1 = p2-p1
 print('p2-p1: ', end='')
 dbgPoly(p2d1)
-print('p1:', p1,', p2:', p2)
 
 p1d2 = p1-p2
 print('p1-p2: ', end='')
 dbgPoly(p1d2)
-print('p1:', p1,', p2:', p2)
 
 p0 = p1d2+p2d1
 print('(p2-p1) + (p1-p2): ', end='')
 dbgPoly(p0)
 print('equals 0:', p0 == 0)
-print('p1:', p1,', p2:', p2)
 
 p1m2 = p1*p2
 print('p1*p2: ', end='')
 dbgPoly(p1m2)
-print('p1:', p1,', p2:', p2)
 print('(p1*p2)({x:2}):',  p1m2({'x':2}), ', (p1*p2)({y:3}):', p1m2({'y':3}), ', (p1*p2)({x:2,y:3}):', p1m2({'x':2,'y':3}))
+
+print('\np1 and p2 must have remained unchanged:')
+print('p1:', p1,', p2:', p2)
+print()
 
 z = symbol('z')
 ps = x+y+z

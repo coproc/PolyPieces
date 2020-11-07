@@ -3,9 +3,11 @@
 import sys
 sys.path.append('../src')
 
-from UniVarPoly import UniVarPoly, p_x as x
+from UniVarPoly import UniVarPoly, symbol
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot
+
+x = symbol()
 
 # generate density function of triangular distribution
 def triangDistDensity(a,b,c):

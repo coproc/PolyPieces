@@ -147,16 +147,23 @@ class PolyPieceFunc:
 			return []
 		elif isinstance(polyPieces, PolyPiece):
 			return [polyPieces]
-		elif (isinstance(polyPieces, list) or isinstance(polyPieces, tuple)) and all([isinstance(pp, PolyPiece) for pp in polyPieces]):
-			return polyPieces
 		else:
-			try:
-				return [PolyPiece(pp) for pp in polyPieces]
-			except TypeError:
-				raise TypeError("piecewise polynomial function cannot be created from '%s'" % [polyPieces])
-			except Exception:
-				raise ValueError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
+			for constrFunc in [PolyPieceFunc._constructPP_fromPPs, PolyPieceFunc._constructPP_fromPPConvertibles]:
+				try:
+					return constrFunc(polyPieces)
+				except: pass
+		raise TypeError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
+
+	@staticmethod
+	def _constructPP_fromPPs(polyPieces):
+		if all([isinstance(pp, PolyPiece) for pp in ret]):
+			return list(polyPieces)
+		raise InvalidArgument("poly pieces cannot be constructed by mere copying")
 		
+	@staticmethod
+	def _constructPP_fromPPConvertibles(polyPieces):
+		return [PolyPiece(pp) for pp in polyPieces]
+
 
 	def _isConsistent(self, prec=1e-10, printFailReason=False):
 		if len(self.polyPieces) == 0: return True

@@ -136,22 +136,26 @@ class PolyPieceFunc:
 	     0, else
 	'''
 	def __init__(self, polyPieces=None):
+		self.polyPieces = PolyPieceFunc._constructPolyPieces(polyPieces)
+		self._normalize()
+		if not self._isConsistent():
+			raise ValueError("invalid poly pieces in '%s'" % polyPieces)
+
+	@staticmethod
+	def _constructPolyPieces(polyPieces):
 		if polyPieces is None:
-			self.polyPieces = []
+			return []
 		elif isinstance(polyPieces, PolyPiece):
-			self.polyPieces = [polyPieces]
-		elif isinstance(polyPieces, list) and all([isinstance(pp, PolyPiece) for pp in polyPieces]):
-			self.polyPieces = polyPieces
+			return [polyPieces]
+		elif (isinstance(polyPieces, list) or isinstance(polyPieces, tuple)) and all([isinstance(pp, PolyPiece) for pp in polyPieces]):
+			return polyPieces
 		else:
 			try:
-				self.polyPieces = [PolyPiece(pp) for pp in polyPieces]
+				return [PolyPiece(pp) for pp in polyPieces]
 			except TypeError:
 				raise TypeError("piecewise polynomial function cannot be created from '%s'" % [polyPieces])
 			except Exception:
 				raise ValueError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
-		self._normalize()
-		if not self._isConsistent():
-			raise ValueError("invalid poly pieces in '%s'" % polyPieces)
 		
 
 	def _isConsistent(self, prec=1e-10, printFailReason=False):

@@ -169,13 +169,12 @@ class PolyPieceFunc:
 						#print('trying', constrFunc, file=sys.stderr)
 						return constrFunc(polyPieces[0])
 					except: pass
-		else:
-			for constrFunc in [PolyPieceFunc._constructPP_fromPPs, PolyPieceFunc._constructPP_fromPPConvertibles,
-				PolyPieceFunc._constructPP_fromPolyLimitPairs]:
-				try:
-					#print('trying', constrFunc, file=sys.stderr)
-					return constrFunc(polyPieces)
-				except: pass
+		for constrFunc in [PolyPieceFunc._constructPP_fromPPs, PolyPieceFunc._constructPP_fromPPConvertibles,
+			PolyPieceFunc._constructPP_fromPolyLimitPairs]:
+			try:
+				#print('trying', constrFunc, file=sys.stderr)
+				return constrFunc(polyPieces)
+			except: pass
 		raise TypeError("piecewise polynomial function cannot be created from '%s'" % (polyPieces,))
 
 	@staticmethod

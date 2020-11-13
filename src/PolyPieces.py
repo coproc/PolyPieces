@@ -15,17 +15,19 @@ class PolyPiece:
 				self.interval = poly.interval
 			else:
 				try:
-					poly,self.interval = poly
+					poly,interval = poly
+					PolyPiece(poly, interval) # check if arguments are valid
 					self.poly = poly if isinstance(poly,UniVarPoly) else UniVarPoly(poly)
+					self.interval = interval
 				except Exception:
 					raise TypeError("PolyPiece cannot be constructed from '%s'" % [poly])
-		else:
+		elif len(interval) == 2 and all([isinstance(n, numbers.Real) for n in interval]):
+			if  interval[1] < interval[0]:
+				raise ValueError("cannot create PolyPiece: invalid interval '%s'" % interval)
 			self.poly = poly if isinstance(poly, UniVarPoly) else UniVarPoly(poly)
 			self.interval = interval
-			if len(self.interval) != 2 or not all([isinstance(n, numbers.Real) for n in self.interval]):
-				raise TypeError("cannot create PolyPiece: invalid interval '%s'" % interval)
-			if  self.interval[0] > self.interval[1]:
-				raise ValueError("cannot create PolyPiece: invalid interval '%s'" % interval)
+		else:
+			raise TypeError("cannot create PolyPiece, this is not an interval of reals: '%s'" % interval)
 
 
 	def conv(self, pp):
@@ -134,12 +136,18 @@ class PolyPieceFunc:
 	   f(x) =
 	     x, x in [0,1]
 	     0, else
+	   >>> fpp = PolyPieceFunc(((0,0), (x,1), (1,2)))
+	   >>> print(fpp)
+	   f(x) =
+	     x, x in [0,1]
+	     1, x in [1,2]
+	     0, else
 	'''
 	def __init__(self, polyPieces=None):
 		self.polyPieces = PolyPieceFunc._constructPolyPieces(polyPieces)
 		self._normalize()
 		if not self._isConsistent():
-			raise ValueError("invalid poly pieces in '%s'" % polyPieces)
+			raise ValueError("inconsistent poly pieces in '%s'" % polyPieces)
 
 	@staticmethod
 	def _constructPolyPieces(polyPieces):
@@ -148,8 +156,10 @@ class PolyPieceFunc:
 		elif isinstance(polyPieces, PolyPiece):
 			return [polyPieces]
 		else:
-			for constrFunc in [PolyPieceFunc._constructPP_fromPPs, PolyPieceFunc._constructPP_fromPPConvertibles]:
+			for constrFunc in [PolyPieceFunc._constructPP_fromPPs, PolyPieceFunc._constructPP_fromPPConvertibles,
+				PolyPieceFunc._constructPP_fromPolyLimitPairs]:
 				try:
+					#print('trying', constrFunc, file=sys.stderr)
 					return constrFunc(polyPieces)
 				except: pass
 		raise TypeError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
@@ -163,6 +173,17 @@ class PolyPieceFunc:
 	@staticmethod
 	def _constructPP_fromPPConvertibles(polyPieces):
 		return [PolyPiece(pp) for pp in polyPieces]
+
+	@staticmethod
+	def _constructPP_fromPolyLimitPairs(polyPieces):
+		lowerLimit = -float('inf')
+		ret = []
+		for poly,upperLimit in polyPieces:
+			interval = (lowerLimit, upperLimit)
+			lowerLimit = upperLimit
+			if interval[0] == -float('inf') and poly == 0: continue
+			ret.append(PolyPiece(poly, interval))
+		return ret
 
 
 	def _isConsistent(self, prec=1e-10, printFailReason=False):

@@ -142,19 +142,33 @@ class PolyPieceFunc:
 	     x, x in [0,1]
 	     1, x in [1,2]
 	     0, else
+	   >>> fpp = PolyPieceFunc((0,0), (x,1), (1,2))
+	   >>> print(fpp)
+	   f(x) =
+	     x, x in [0,1]
+	     1, x in [1,2]
+	     0, else
 	'''
-	def __init__(self, polyPieces=None):
-		self.polyPieces = PolyPieceFunc._constructPolyPieces(polyPieces)
+	def __init__(self, *polyPieces):
+		self.polyPieces = PolyPieceFunc._constructPolyPieces(*polyPieces)
 		self._normalize()
 		if not self._isConsistent():
 			raise ValueError("inconsistent poly pieces in '%s'" % polyPieces)
 
 	@staticmethod
-	def _constructPolyPieces(polyPieces):
-		if polyPieces is None:
+	def _constructPolyPieces(*polyPieces):
+		if len(polyPieces) == 0:
 			return []
-		elif isinstance(polyPieces, PolyPiece):
-			return [polyPieces]
+		elif len(polyPieces) == 1:
+			if isinstance(polyPieces[0], PolyPiece):
+				return polyPieces
+			else:
+				for constrFunc in [PolyPieceFunc._constructPP_fromPPs, PolyPieceFunc._constructPP_fromPPConvertibles,
+					PolyPieceFunc._constructPP_fromPolyLimitPairs]:
+					try:
+						#print('trying', constrFunc, file=sys.stderr)
+						return constrFunc(polyPieces[0])
+					except: pass
 		else:
 			for constrFunc in [PolyPieceFunc._constructPP_fromPPs, PolyPieceFunc._constructPP_fromPPConvertibles,
 				PolyPieceFunc._constructPP_fromPolyLimitPairs]:
@@ -162,7 +176,7 @@ class PolyPieceFunc:
 					#print('trying', constrFunc, file=sys.stderr)
 					return constrFunc(polyPieces)
 				except: pass
-		raise TypeError("piecewise polynomial function cannot be created from '%s'" % polyPieces)
+		raise TypeError("piecewise polynomial function cannot be created from '%s'" % (polyPieces,))
 
 	@staticmethod
 	def _constructPP_fromPPs(polyPieces):

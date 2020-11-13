@@ -152,7 +152,7 @@ class PolyPieceFunc:
 		self._normalize()
 		if not self._isConsistent():
 			raise ValueError("invalid poly pieces in '%s'" % polyPieces)
-
+		
 
 	def _isConsistent(self, prec=1e-10, printFailReason=False):
 		if len(self.polyPieces) == 0: return True
@@ -485,7 +485,7 @@ class PolyPieceFunc:
 		   True
 		   >>> list(map(lambda x: fppDer.eval(x), [-2,-1,0,1,2]))
 		   [0, 2, 0, -2, 0]
-		   >>> fppDer.int()
+		   >>> fppDer.intDef()
 		   0
 		'''
 		# derivative of constant polynomial is the zero polynomial
@@ -495,23 +495,23 @@ class PolyPieceFunc:
 		return fDer
 
 
-	def int(self, interval=[-float('inf'),float('inf')]):
+	def intDef(self, interval=[-float('inf'),float('inf')]):
 		'''definite integral over given interval
 		
 		   >>> fpp = PolyPieceFunc()
-		   >>> fpp.int()
+		   >>> fpp.intDef()
 		   0
 		   >>> fpp1 = PolyPieceFunc([PolyPiece(1, [0,1])])
-		   >>> fpp1.int()
+		   >>> fpp1.intDef()
 		   1
 		   >>> fpp2 = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]),[0,1]), PolyPiece(UniVarPoly([2,-1]),[1,2])])
-		   >>> fpp2.int([-1,3])
+		   >>> fpp2.intDef([-1,3])
 		   1
-		   >>> fpp2.int([0.5,3])
+		   >>> fpp2.intDef([0.5,3])
 		   0.875
-		   >>> fpp2.int([-1,1.5])
+		   >>> fpp2.intDef([-1,1.5])
 		   0.875
-		   >>> fpp2.int([0.5,1.5])
+		   >>> fpp2.intDef([0.5,1.5])
 		   0.75
 		'''
 		intVal = 0
@@ -543,7 +543,7 @@ class PolyPieceFunc:
 		     0, else
 		   >>> ', '.join([str(pdf2(x)) for x in [0,1,2,3]])
 		   '0, 1/2, 1/2, 0'
-		   >>> pdf2.int([0,4])
+		   >>> pdf2.intDef([0,4])
 		   1
 		   >>> pdf3 = pdf1.conv(pdf1)
 		   >>> print(pdf3)
@@ -553,7 +553,7 @@ class PolyPieceFunc:
 		     1/2x^3 - 4x^2 + 10x - 22/3, x in [2,3]
 		     -1/6x^3 + 2x^2 - 8x + 32/3, x in [3,4]
 		     0, else
-		   >>> pdf3.int([0,4])
+		   >>> pdf3.intDef([0,4])
 		   1
 
 		   >> [pdf3(x) for x in [0,1,2,3,4]]

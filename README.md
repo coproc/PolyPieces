@@ -77,31 +77,5 @@ f(x) =
   0, else
 ```
 
-### Exact computations
-```python
->>> from fractions import Fraction
->>> from UniVarPoly import symbol
->>> x = symbol()
->>> poly_rat = 5*x - Fraction(1,4)
->>> print(poly_rat)
-```
-```
-5x - 1/4
-```
-```python
-# indefinite integral
->>> poly_rat.int()
-```
-```
-<UniVarPoly '5/2x^2 - 1/4x'>
-```
-```python
-# exponentiation
->>> poly_rat**4
-```
-```
-<UniVarPoly '625x^4 - 125x^3 + 75/8x^2 - 5/16x + 1/256'>
-```
-
 ## Tests
 See the doctests in the implementation files.

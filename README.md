@@ -14,7 +14,7 @@ To convert a polynomial's (or a piecewise polynomial function's) integer or rati
 
 ## Installation
 
-Simply copy the files from `src/`.
+Simply copy the files from [`src/`](https://github.com/coproc/PolyPieces/tree/master/src).
 
 
 ## Examples

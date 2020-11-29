@@ -20,7 +20,6 @@ def discover_and_run_tests(rootPath):
 	
 	args:
 		rootPath (str): path to root of tests
-	
 	returns:
 		test result summary object on all tests run.
 	"""

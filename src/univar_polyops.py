@@ -8,6 +8,7 @@ e.g. as a list [c0, c1, ..., cn] representing the polynomial c0 + c1*x + ... + c
 from itertools import islice, zip_longest
 
 
+# islice does not allow a negative step
 def _rev_islice(cont, start, stop):
 	for i in range(start, stop, -1):
 		yield cont[i]
@@ -45,6 +46,11 @@ def add(coeffs1, coeffs2):
 
 def subtract(coeffs1, coeffs2):
 	s = [c1-c2 for c1,c2 in zip_longest(coeffs1, coeffs2, fillvalue=0)]
+	return normalize(s)
+
+
+def scale(c, coeffs):
+	s = [c*coeff for coeff in coeffs]
 	return normalize(s)
 
 

@@ -23,7 +23,7 @@ Basic usage. For more elaborate examples see the files in `examples/`.
 
 ### Simple example with class Polynomial
 ```python
->>> from Polynomial import Polynomial, symbol
+>>> from Polynomial import symbol
 
 >>> x = symbol()
 >>> poly = 3*x - 1

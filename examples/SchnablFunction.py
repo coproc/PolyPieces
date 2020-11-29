@@ -17,7 +17,6 @@ sys.path.append(str(SRC_DIR.resolve()))
 
 import math
 from fractions import Fraction
-from UniVarPoly import UniVarPoly
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot
 

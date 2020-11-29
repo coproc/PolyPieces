@@ -14,7 +14,7 @@ def _p():
 		_p_ = None
 #------------ CODE INIT ------------
 
-from UniVarPoly import UniVarPoly, symbol
+from Polynomial import symbol
 x = symbol()
 poly = 3*x - 1
 _p_= poly*poly
@@ -43,18 +43,10 @@ print(uniformDensitySum2.conv(uniformDensity))
 _p()
 _p()
 _p()
+_p()
 print(uniformDensitySum2.conv(uniformDensity).conv(uniformDensity))
 _p()
 _p()
 _p()
-from fractions import Fraction
-from UniVarPoly import symbol
-x = symbol()
-poly_rat = 5*x - Fraction(1,4)
-print(poly_rat)
-# indefinite integral
-_p_= poly_rat.int()
 _p()
-# exponentiation
-_p_= poly_rat**4
 _p()

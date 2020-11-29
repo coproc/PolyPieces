@@ -1,5 +1,5 @@
 '''
-Multivariate polynomials can be represented as nested UniVarPoly (i.e. the coefficients are of type UniVarPoly).
+Multivariate polynomials are represented as nested univarate polynomials (i.e. the coefficients can polynomials themselves).
 The lexicographic ordering of the variables is assumed to be ascending when going from the inner most polynomials
 to the outer levels.
 '''
@@ -10,7 +10,7 @@ SCRIPT_DIR = os.path.split(os.path.abspath(__file__))[0]
 SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR,'../src'))
 
 sys.path.append(SRC_DIR)
-from UniVarPoly import UniVarPoly as UP, symbol, symbols
+from Polynomial import Polynomial as Poly, symbol, symbols
 
 def dbgPoly(poly):
 	print(poly.format(termOrderAsc=True), ', coeffs:', poly.coeffs)
@@ -74,5 +74,5 @@ print(ps2(3))
 print(ps2(3)(2))
 print(ps2(3)(2)(1))
 
-pxyz = UP.fromString('-x*y*z')
+pxyz = Poly.fromString('-x*y*z')
 dbgPoly(pxyz)

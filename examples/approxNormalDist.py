@@ -7,7 +7,7 @@ sys.path.append('../src')
 
 import math
 from fractions import Fraction
-from UniVarPoly import UniVarPoly, symbol
+from Polynomial import symbol
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot
 
@@ -25,7 +25,7 @@ def normalDistDensity(expVal=0, sigma=1):
 # @param fpp density function as piecewise polynomial function
 def expectation(fpp):
 	fpp_x = p_x * fpp
-	return fpp_x.int()
+	return fpp_x.intDef()
 
 
 # compute variance
@@ -36,7 +36,7 @@ def expectation(fpp):
 def variance(fpp, expVal=None):
 	if expVal is None: expVal = expectation(fpp)
 	fpp_x2 = p_x2 * fpp
-	return fpp_x2.int() - expVal*expVal
+	return fpp_x2.intDef() - expVal*expVal
 
 
 TextPlot.adjustConsoleEncodingForUnicode()
@@ -52,7 +52,7 @@ print(TextPlot.plotFpp(d_deg3))
 expVal = expectation(d_deg3)
 var = variance(d_deg3)
 d_deg3_max = d_deg3.eval(2)
-print("area=%s, expectation value=%s, variance=%s, f_max=f(2)=%s=%f" % (d_deg3.int(), expVal, var, d_deg3_max, d_deg3_max))
+print("area=%s, expectation value=%s, variance=%s, f_max=f(2)=%s=%f" % (d_deg3.intDef(), expVal, var, d_deg3_max, d_deg3_max))
 
 ndd = normalDistDensity(expVal, math.sqrt(var))
 #print(TextPlot.plot(ndd, [0,4]))
@@ -76,7 +76,7 @@ print()
 expVal_s = expectation(d_deg11_s)
 var_s = variance(d_deg11_s)
 d_deg11_max = d_deg11_s.eval(0)
-print("area=%s, expectation value=%s, variance=%s, f_max=f(0)=%s=%f" % (d_deg11_s.int(), expVal_s, var_s, d_deg11_max, d_deg11_max))
+print("area=%s, expectation value=%s, variance=%s, f_max=f(0)=%s=%f" % (d_deg11_s.intDef(), expVal_s, var_s, d_deg11_max, d_deg11_max))
 
 ndd_s = normalDistDensity()
 ndd_s_dev = lambda x: d_deg11_s.eval(x) - ndd_s(x)

@@ -3,7 +3,7 @@
 import sys
 sys.path.append('../src')
 
-from UniVarPoly import UniVarPoly, symbol
+from Polynomial import symbol
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot
 

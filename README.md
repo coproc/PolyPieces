@@ -3,7 +3,7 @@
 The main intent of this package is to compute the exact convolution of piecewise polynomial functions
 (for getting the density functions of sums of random variables).
 Therefor it provides 
-* the class `UniVarPoly` for basic symbolic computation with univariate polynomials and 
+* the class `Polynomial` for basic symbolic computation with polynomials and 
 * the class `PolyPieceFunc` for basic symbolic computation with piecewise polynomial functions.
 
 The coefficient domain used for computing with the polynomials is defined by the types of the coefficients 
@@ -21,14 +21,14 @@ Simply copy the files from [`src/`](https://github.com/coproc/PolyPieces/tree/ma
 
 Basic usage. For more elaborate examples see the files in `examples/`.
 
-### Simple example with UniVarPoly
+### Simple example with class Polynomial
 ```python
->>> from UniVarPoly import UniVarPoly, symbol
+>>> from Polynomial import Polynomial, symbol
 
 >>> x = symbol()
 >>> poly = 3*x - 1
 >>> poly*poly
-<UniVarPoly '9x^2 - 6x + 1'>
+<Polynomial '9x^2 - 6x + 1'>
 >>> poly_3 = poly**3; print(poly_3)
 27x^3 - 27x^2 + 9x - 1
 >>> poly_3(1)

@@ -1,4 +1,6 @@
-'''Basic arithmetic for univariate polynomials encoded as list of coefficients
+'''A lightweight polynomial class with basic arithmetic.
+Implemented as (nested) univariate polynomial: the coefficients can be
+polynomials themselves.
 '''
 from __future__ import division
 import copy
@@ -7,7 +9,7 @@ import numbers
 import re
 
 
-class UniVarPoly:
+class Polynomial:
 	def __init__(self, repr=0, varName='x'):
 		'''create univariate polynomial.
 
@@ -19,19 +21,19 @@ class UniVarPoly:
 		   If a string is given it is evaluated as Python expression in the given
 		   variable (default: 'x').
 		   If no input is given the 0 polynomial is assumed.
-		   >>> p_0 = UniVarPoly()
+		   >>> p_0 = Polynomial()
 		   >>> p_0.coeffs
 		   [0]
-		   >>> p_1 = UniVarPoly(1)
+		   >>> p_1 = Polynomial(1)
 		   >>> p_1.coeffs
 		   [1]
-		   >>> p_x2 = UniVarPoly([0,0,1]) # x^2
+		   >>> p_x2 = Polynomial([0,0,1]) # x^2
 		   >>> p_x2.coeffs
 		   [0, 0, 1]
-		   >>> p = UniVarPoly('(x-1)*(x+1)')
+		   >>> p = Polynomial('(x-1)*(x+1)')
 		   >>> p.coeffs
 		   [-1, 0, 1]
-		   >>> p2 = UniVarPoly(p)
+		   >>> p2 = Polynomial(p)
 		   >>> p.coeffs.append(1)
 		   >>> p2.coeffs
 		   [-1, 0, 1]
@@ -39,13 +41,13 @@ class UniVarPoly:
 		   [-1, 0, 1, 1]
 		'''
 		self.varName = varName
-		if isinstance(repr, UniVarPoly):
+		if isinstance(repr, Polynomial):
 			self.coeffs = copy.deepcopy(repr.coeffs)
 			self.varName = repr.varName
 		elif isinstance(repr, numbers.Number):
 			self.coeffs = [repr]
 		elif isinstance(repr, str):
-			p = UniVarPoly.fromString(repr, varName)
+			p = Polynomial.fromString(repr, varName)
 			self.coeffs = p.coeffs
 		else:
 			try:
@@ -67,13 +69,13 @@ class UniVarPoly:
 		   >>> p.varName
 		   'y'
 		   >>> poly('x^2')
-		   <UniVarPoly 'x^2'>
+		   <Polynomial 'x^2'>
 		   >>> poly('2xy')
-		   <UniVarPoly '2xy'>
+		   <Polynomial '2xy'>
 		   >>> poly('(x+y)(x-y)')
-		   <UniVarPoly '-y^2 + x^2'>
+		   <Polynomial '-y^2 + x^2'>
 		   >>> poly('x-1/2')
-		   <UniVarPoly 'x - 1/2'>
+		   <Polynomial 'x - 1/2'>
 		'''
 		if varNames is None:
 			varNames = set(re.findall('[a-zA-Z][0-9]*', exprStr))
@@ -88,19 +90,19 @@ class UniVarPoly:
 	def deg(self, varName=None):
 		'''degree of polynomial
 		
-		   >>> UniVarPoly([0, 1, 1]).deg()
+		   >>> Polynomial([0, 1, 1]).deg()
 		   2
 		'''
 		if varName is None or varName == self.varName:
 			return len(self.coeffs) - 1
 		if varName < self.varName: return 0 # optimization
-		return max([c.deg(varName) for c in self.coeffs if isinstance(c, UniVarPoly)], default=0)
+		return max([c.deg(varName) for c in self.coeffs if isinstance(c, Polynomial)], default=0)
 
 
 	def eval(self, x0):
 		'''evaluate polynomial at given x0, i.e. compute poly(x0)
 		
-		   >>> p = UniVarPoly([1, 2, 1])
+		   >>> p = Polynomial([1, 2, 1])
 		   >>> p.eval(0)
 		   1
 		   >>> p.eval(1)
@@ -119,12 +121,12 @@ class UniVarPoly:
 		while len(self.coeffs) > 1 and self.coeffs[-1] == 0:
 			self.coeffs = self.coeffs[:-1]
 		for idx,c in enumerate(self.coeffs):
-			if isinstance(c, UniVarPoly):
+			if isinstance(c, Polynomial):
 				c._normalize()
 				if c.deg() == 0:
 					assert len(c.coeffs) <= 1
 					self.coeffs[idx] = 0 if len(c.coeffs) == 0 else c.coeffs[0]
-		if len(self.coeffs) == 1 and isinstance(self.coeffs[0], UniVarPoly):
+		if len(self.coeffs) == 1 and isinstance(self.coeffs[0], Polynomial):
 			self.varName = self.coeffs[0].varName
 			self.coeffs = self.coeffs[0].coeffs
 
@@ -146,14 +148,14 @@ class UniVarPoly:
 		'''add another polynomial.
 		   poly can be a number, a coefficient list or another univariate polynomial
 		   
-		   >>> p = UniVarPoly([0,1]) # x
+		   >>> p = Polynomial([0,1]) # x
 		   >>> p.iadd(-1)
 		   >>> p.coeffs
 		   [-1, 1]
 		   >>> p.iadd([0,0,1])
 		   >>> p.coeffs
 		   [-1, 1, 1]
-		   >>> p.iadd(UniVarPoly([0,0,-1]))
+		   >>> p.iadd(Polynomial([0,0,-1]))
 		   >>> p.coeffs
 		   [-1, 1]
 		'''
@@ -161,14 +163,14 @@ class UniVarPoly:
 			self.coeffs[0] += poly
 		elif isinstance(poly, list):
 			self._iaddCoeffs(poly)
-		elif isinstance(poly, UniVarPoly):
+		elif isinstance(poly, Polynomial):
 			if self.varName == poly.varName:
 				self._iaddCoeffs(poly.coeffs)
 			elif self.varName > poly.varName:
 				self.coeffs[0] += poly
 				self._normalize()
 			else:
-				tmp = UniVarPoly(self)
+				tmp = Polynomial(self)
 				self.coeffs = copy.deepcopy(poly.coeffs)
 				self.varName = poly.varName
 				self.coeffs[0] += tmp			
@@ -181,14 +183,14 @@ class UniVarPoly:
 		'''subtract another polynomial.
 		   poly can be a number, a coefficient list or another univariate polynomial
 		   
-		   >>> p = UniVarPoly([0,1]) # x
+		   >>> p = Polynomial([0,1]) # x
 		   >>> p.isub(1)
 		   >>> p.coeffs
 		   [-1, 1]
 		   >>> p.isub([1,1])
 		   >>> p.coeffs
 		   [-2]
-		   >>> p.isub(UniVarPoly([0,-1]))
+		   >>> p.isub(Polynomial([0,-1]))
 		   >>> p.coeffs
 		   [-2, 1]
 		'''
@@ -196,14 +198,14 @@ class UniVarPoly:
 			self.coeffs[0] -= poly
 		elif isinstance(poly, list):
 			self._isubCoeffs(poly)
-		elif isinstance(poly, UniVarPoly):
+		elif isinstance(poly, Polynomial):
 			if self.varName == poly.varName:
 				self._isubCoeffs(poly.coeffs)
 			elif self.varName > poly.varName:
 				self.coeffs[0] -= poly
 				self._normalize()
 			else:
-				tmp = UniVarPoly(self)
+				tmp = Polynomial(self)
 				self.coeffs = copy.deepcopy(poly.coeffs)
 				self.varName = poly.varName
 				self.scale(-1)
@@ -216,14 +218,14 @@ class UniVarPoly:
 	def __add__(self, poly):
 		'''overload operator +
 		
-		   >>> p1 = UniVarPoly([0,1,1])
-		   >>> p2 = UniVarPoly([0,0,-1])
+		   >>> p1 = Polynomial([0,1,1])
+		   >>> p2 = Polynomial([0,0,-1])
 		   >>> p = p1 + 1 + [0,-1] + p2
 		   >>> p.coeffs
 		   [1]
 		'''
 		try:
-			pSum = UniVarPoly(self)
+			pSum = Polynomial(self)
 			pSum.iadd(poly)
 			return pSum
 		except ValueError:
@@ -234,7 +236,7 @@ class UniVarPoly:
 	def __iadd__(self, poly):
 		'''overload operator +=
 		
-		   >>> p = UniVarPoly([0,1])
+		   >>> p = Polynomial([0,1])
 		   >>> p += 1
 		   >>> p.coeffs
 		   [1, 1]
@@ -245,7 +247,7 @@ class UniVarPoly:
 
 	def __radd__(self, poly):
 		'''overload operator + for right hand side
-		   >>> p = UniVarPoly([0,1])
+		   >>> p = Polynomial([0,1])
 		   >>> p = -1 + p
 		   >>> p.coeffs
 		   [-1, 1]
@@ -256,14 +258,14 @@ class UniVarPoly:
 	def __sub__(self, poly):
 		'''overload operator -
 		
-		   >>> p1 = UniVarPoly([0,1,1])
-		   >>> p2 = UniVarPoly([1,0,1])
+		   >>> p1 = Polynomial([0,1,1])
+		   >>> p2 = Polynomial([1,0,1])
 		   >>> p = p1 - p2
 		   >>> p.coeffs
 		   [-1, 1]
 		'''
 		try:
-			pDiff = UniVarPoly(self.coeffs, varName=self.varName)
+			pDiff = Polynomial(self.coeffs, varName=self.varName)
 			pDiff.isub(poly)
 			return pDiff
 		except ValueError:
@@ -273,7 +275,7 @@ class UniVarPoly:
 	def __isub__(self, poly):
 		'''overload operator -=
 		
-		   >>> p = UniVarPoly([0,1])
+		   >>> p = Polynomial([0,1])
 		   >>> p -= 1
 		   >>> p.coeffs
 		   [-1, 1]
@@ -284,18 +286,18 @@ class UniVarPoly:
 
 	def __rsub__(self, poly):
 		'''overload operator - for right hand side
-		   >>> p = UniVarPoly([0,1])
+		   >>> p = Polynomial([0,1])
 		   >>> (1 - p).coeffs
 		   [1, -1]
 		'''
-		p = UniVarPoly(poly, varName=self.varName)
+		p = Polynomial(poly, varName=self.varName)
 		return p.__sub__(self)
 
 
 	def scale(self, s):
 		'''multiply each coefficient with given scale s
 		
-		   >>> p = UniVarPoly([2,1])
+		   >>> p = Polynomial([2,1])
 		   >>> p.scale(2)
 		   >>> p.coeffs
 		   [4, 2]
@@ -312,7 +314,7 @@ class UniVarPoly:
 	def scaled(self, s):
 		'''return polynomial scaled by given scale s
 		
-		   >>> p1 = UniVarPoly([2,1])
+		   >>> p1 = Polynomial([2,1])
 		   >>> p2 = p1.scaled(2)
 		   >>> p2.coeffs
 		   [4, 2]
@@ -321,8 +323,8 @@ class UniVarPoly:
 		   [0]
 		'''
 		if s == 0:
-			return UniVarPoly(0, varName=self.varName)
-		polyScaled = UniVarPoly(self)
+			return Polynomial(0, varName=self.varName)
+		polyScaled = Polynomial(self)
 		polyScaled.scale(s)
 		return polyScaled
 
@@ -345,7 +347,7 @@ class UniVarPoly:
 	def __pos__(self):
 		'''override unary operator +
 
-		   >>> p = UniVarPoly([1,-1])
+		   >>> p = Polynomial([1,-1])
 		   >>> (+p).coeffs
 		   [1, -1]
 		'''
@@ -355,7 +357,7 @@ class UniVarPoly:
 	def __neg__(self):
 		'''override unary operator -
 
-		   >>> p = UniVarPoly([1,-1])
+		   >>> p = Polynomial([1,-1])
 		   >>> (-p).coeffs
 		   [-1, 1]
 		'''
@@ -365,12 +367,12 @@ class UniVarPoly:
 	def __mul__(self, poly):
 		'''overload operator *
 		
-		   >>> p1 = UniVarPoly([0,1])
-		   >>> p2 = UniVarPoly([1,1])
+		   >>> p1 = Polynomial([0,1])
+		   >>> p2 = Polynomial([1,1])
 		   >>> p = p1 * p2
 		   >>> p.coeffs
 		   [0, 1, 1]
-		   >>> p0 = p1 * UniVarPoly(0)
+		   >>> p0 = p1 * Polynomial(0)
 		   >>> p0.coeffs
 		   [0]
 		'''
@@ -378,7 +380,7 @@ class UniVarPoly:
 			return self.scaled(poly)
 		if isinstance(poly, list):
 			coeffs = poly
-		elif isinstance(poly, UniVarPoly):
+		elif isinstance(poly, Polynomial):
 			if self.varName == poly.varName:
 				coeffs = poly.coeffs
 			elif self.varName > poly.varName:
@@ -387,13 +389,13 @@ class UniVarPoly:
 				return poly.scaled(self)
 		else:
 			return NotImplemented
-		return UniVarPoly(self._mulCoeffs(coeffs), varName=self.varName)
+		return Polynomial(self._mulCoeffs(coeffs), varName=self.varName)
 
 
 	def imul(self, poly):
 		'''multiply polynomial with coefficient, coefficient list or polynomial
 		
-		   >>> p = UniVarPoly([0,1])
+		   >>> p = Polynomial([0,1])
 		   >>> p.imul(2)
 		   >>> p.coeffs
 		   [0, 2]
@@ -412,7 +414,7 @@ class UniVarPoly:
 	def __imul__(self, poly):
 		'''overload operator *=
 		
-		   >>> p = UniVarPoly([0,1])
+		   >>> p = Polynomial([0,1])
 		   >>> p *= 2
 		   >>> p.coeffs
 		   [0, 2]
@@ -423,7 +425,7 @@ class UniVarPoly:
 
 	def __rmul__(self, poly):
 		'''overload operator * for right hand side
-		   >>> p1 = UniVarPoly([0,1])
+		   >>> p1 = Polynomial([0,1])
 		   >>> p2 = 2 * p1
 		   >>> p2.coeffs
 		   [0, 2]
@@ -434,7 +436,7 @@ class UniVarPoly:
 	def _termQuot(self, div):
 		if isinstance(div, numbers.Number):
 			return self/div
-		assert isinstance(div, UniVarPoly), "internal error: unexpected div type %s" % type(div)
+		assert isinstance(div, Polynomial), "internal error: unexpected div type %s" % type(div)
 		if div.deg() == 0:
 			assert isinstance(div.coeffs[0], numbers.Number), "internal error: unexpected div poly '%s' of var '%s'" % (div.coeffs[0], div.varName)
 			return self/div.coeffs[0]
@@ -444,19 +446,19 @@ class UniVarPoly:
 		deg2,div_rec = (div.deg(),div.coeffs[-1]) if div.varName == self.varName else (0,div)
 		for exp in range(deg1,deg2-1,-1):
 			ci = self.coeffs[exp]
-			if isinstance(ci, UniVarPoly):
-				return UniVarPoly((exp-deg2)*[0] + [ci._termQuot(div_rec)], self.varName)
+			if isinstance(ci, Polynomial):
+				return Polynomial((exp-deg2)*[0] + [ci._termQuot(div_rec)], self.varName)
 			assert isinstance(ci, numbers.Number), "internal error: unexpected coefficient %s (type %s)" % (ci, type(ci))
 			if isinstance(div_rec, numbers.Number):
 				if isinstance(ci, int): ci = Fraction(ci)
-				return UniVarPoly((exp-deg2)*[0] + [ci/div_rec], self.varName)
+				return Polynomial((exp-deg2)*[0] + [ci/div_rec], self.varName)
 		raise ValueError("cannot divide '%s' by '%s'" % (self, div))
 
 
 	def __truediv__(self, d):
 		'''overload operators /, /=
 		
-		   >>> p1 = UniVarPoly('2x-1')
+		   >>> p1 = Polynomial('2x-1')
 		   >>> p = p1 / 5
 		   >>> p.coeffs
 		   [Fraction(-1, 5), Fraction(2, 5)]
@@ -476,9 +478,9 @@ class UniVarPoly:
 			except TypeError:
 				scaleFac = 1/d
 			return self.scaled(scaleFac)
-		if not isinstance(d, UniVarPoly):
+		if not isinstance(d, Polynomial):
 			raise TypeError("divisor of invalid type %s" % type(d))
-		quot,rem = 0,UniVarPoly(self)
+		quot,rem = 0,Polynomial(self)
 		try:
 			while True:
 				q = rem._termQuot(d)
@@ -492,7 +494,7 @@ class UniVarPoly:
 	def __pow__(self, e):
 		'''overlaod operator ** (exponentiation)
 
-		   >>> p = UniVarPoly([-1,1])
+		   >>> p = Polynomial([-1,1])
 		   >>> p2 = p**2
 		   >>> p2.coeffs
 		   [1, -2, 1]
@@ -500,8 +502,8 @@ class UniVarPoly:
 		   >>> p3.coeffs
 		   [-1, 3, -3, 1]
 		'''
-		res = UniVarPoly(1, varName=self.varName)
-		p_2 = UniVarPoly(self, varName=self.varName)
+		res = Polynomial(1, varName=self.varName)
+		p_2 = Polynomial(self, varName=self.varName)
 		while (e>0):
 			if e % 2: res *= p_2
 			e >>= 1
@@ -512,27 +514,27 @@ class UniVarPoly:
 	def comp(self, poly):
 		'''compute polynomial composition self o poly
 		
-		   >>> p1 = UniVarPoly([0,0,1]) # x**2
-		   >>> p2 = UniVarPoly([-1,1])  # x-1
+		   >>> p1 = Polynomial([0,0,1]) # x**2
+		   >>> p2 = Polynomial([-1,1])  # x-1
 		   >>> p = p1.comp(p2)          # (x-1)**2
 		   >>> p.coeffs
 		   [1, -2, 1]
-		   >>> p3 = UniVarPoly([0,0,0,1]) # x**3
+		   >>> p3 = Polynomial([0,0,0,1]) # x**3
 		   >>> p3.comp(p2).coeffs         # (x-1)**3
 		   [-1, 3, -3, 1]
 		'''
 		if isinstance(poly, numbers.Number):
 			return self.eval(poly)
 		if isinstance(poly, dict) and not self.varName in poly:
-			coeffsComp = [c.comp(poly) if isinstance(c, UniVarPoly) else c for c in self.coeffs]
-			return UniVarPoly(coeffsComp, varName=self.varName)
-		varName = poly.varName if isinstance(poly, UniVarPoly) else self.varName
-		poly_var = UniVarPoly(poly[self.varName], varName=varName) if isinstance(poly, dict) else UniVarPoly(poly, varName=varName)
-		poly_k = UniVarPoly(poly_var)
+			coeffsComp = [c.comp(poly) if isinstance(c, Polynomial) else c for c in self.coeffs]
+			return Polynomial(coeffsComp, varName=self.varName)
+		varName = poly.varName if isinstance(poly, Polynomial) else self.varName
+		poly_var = Polynomial(poly[self.varName], varName=varName) if isinstance(poly, dict) else Polynomial(poly, varName=varName)
+		poly_k = Polynomial(poly_var)
 		def _subs(expr, s):
-			return expr.comp(s) if isinstance(expr, UniVarPoly) and isinstance(s, dict) else expr
+			return expr.comp(s) if isinstance(expr, Polynomial) and isinstance(s, dict) else expr
 		c_0 = _subs(self.coeffs[0], poly)
-		polyComp = UniVarPoly([c_0], varName=poly_var.varName)
+		polyComp = Polynomial([c_0], varName=poly_var.varName)
 		for k in range(1, len(self.coeffs)):
 			if k > 1: poly_k *= poly_var
 			c_k = _subs(self.coeffs[k], poly)
@@ -544,10 +546,10 @@ class UniVarPoly:
 	def __call__(self, poly):
 		'''overload call operator (composition/substitution/evaluation)
 		
-		   >>> p1 = UniVarPoly('x**2+x-1')
+		   >>> p1 = Polynomial('x**2+x-1')
 		   >>> p1(0)
 		   -1
-		   >>> p2 = UniVarPoly('1-x')
+		   >>> p2 = Polynomial('1-x')
 		   >>> p1(p2).coeffs
 		   [1, -3, 1]
 		   >>> p1(p2)(p2).coeffs
@@ -559,27 +561,27 @@ class UniVarPoly:
 	def der(self, varName=None):
 		'''compute derivative of polynomial
 		
-		   >>> p = UniVarPoly([0, 0, 1])
+		   >>> p = Polynomial([0, 0, 1])
 		   >>> pd = p.der()
 		   >>> pd.coeffs
 		   [0, 2]
 		'''
 		if varName is None or varName == self.varName:
 			# derivative of constant polynomial is the zero polynomial
-			if len(self.coeffs) == 1: return UniVarPoly(varName=self.varName)
+			if len(self.coeffs) == 1: return Polynomial(varName=self.varName)
 			
 			coeffsDer = [(i+1)*c for i,c in enumerate(self.coeffs[1:])]
-			return UniVarPoly(coeffsDer, varName=self.varName)
+			return Polynomial(coeffsDer, varName=self.varName)
 		if varName > self.varName:
-			return UniVarPoly(varName=varName)
-		coeffsDer = [c.der(varName) if isinstance(c, UniVarPoly) else 0 for c in self.coeffs]
-		return UniVarPoly(coeffsDer, varName=self.varName)
+			return Polynomial(varName=varName)
+		coeffsDer = [c.der(varName) if isinstance(c, Polynomial) else 0 for c in self.coeffs]
+		return Polynomial(coeffsDer, varName=self.varName)
 
 
 	def int(self, interval=None, varName=None):
 		'''compute indefinite or definite integral of polynomial
 		
-		   >>> p = UniVarPoly([0, 1])
+		   >>> p = Polynomial([0, 1])
 		   >>> p.int().coeffs
 		   [0, 0, Fraction(1, 2)]
 		   >>> p.int([0,1])
@@ -593,7 +595,7 @@ class UniVarPoly:
 	def intDef(self, interval, varName=None):
 		'''definite integral.
 
-		   >>> p = UniVarPoly([0, 1])
+		   >>> p = Polynomial([0, 1])
 		   >>> p.intDef([0,1])
 		   Fraction(1, 2)
 		'''
@@ -605,7 +607,7 @@ class UniVarPoly:
 	def intIndef(self, varName=None):
 		'''indefinite integral
 
-		   >>> p1 = UniVarPoly([1, 1])
+		   >>> p1 = Polynomial([1, 1])
 		   >>> p1.intIndef().coeffs
 		   [0, 1, Fraction(1, 2)]
 		'''
@@ -614,11 +616,11 @@ class UniVarPoly:
 			# make new coefficient (0) the same type as existing ones
 			# save division by 1
 			coeffsInt = [c0-c0, c0] + [self.coeffs[i]*Fraction(1,i+1) for i in range(1, len(self.coeffs))]
-			return UniVarPoly(coeffsInt, varName=self.varName)
+			return Polynomial(coeffsInt, varName=self.varName)
 		if varName > self.varName:
-			return UniVarPoly([0, self], varName=varName)
-		coeffsInt = [c.intIndef(varName) if isinstance(c, UniVarPoly) else UniVarPoly([0, c], varName=varName) for c in self.coeffs]
-		return UniVarPoly(coeffsInt, varName=self.varName)
+			return Polynomial([0, self], varName=varName)
+		coeffsInt = [c.intIndef(varName) if isinstance(c, Polynomial) else Polynomial([0, c], varName=varName) for c in self.coeffs]
+		return Polynomial(coeffsInt, varName=self.varName)
 
 
 	@staticmethod
@@ -627,15 +629,15 @@ class UniVarPoly:
 		   Trailing zero decimals and a trailing decimal separator '.' are removed.
 		   default precision: full precision
 		   
-		   >>> UniVarPoly._coeffRepr(1.0)
+		   >>> Polynomial._coeffRepr(1.0)
 		   '1'
-		   >>> UniVarPoly._coeffRepr(0.999)
+		   >>> Polynomial._coeffRepr(0.999)
 		   '0.999'
-		   >>> UniVarPoly._coeffRepr(0.999, 2)
+		   >>> Polynomial._coeffRepr(0.999, 2)
 		   '1'
 		'''
 		if isinstance(c, Fraction): return str(c)
-		if isinstance(c, UniVarPoly): return c.format(coeffPrec=prec, opMul=opMul, opPow=opPow, termOrderAsc=termOrderAsc, termSep=termSep)
+		if isinstance(c, Polynomial): return c.format(coeffPrec=prec, opMul=opMul, opPow=opPow, termOrderAsc=termOrderAsc, termSep=termSep)
 		cFormat = '%f' if prec is None else ('%%.%df' % prec)
 		cRepr = cFormat % c
 		if '.' in cRepr:
@@ -652,37 +654,37 @@ class UniVarPoly:
 	def format(self, coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' '):
 		'''generate string representation of polynomial
 
-		   >>> UniVarPoly().format()
+		   >>> Polynomial().format()
 		   '0'
-		   >>> UniVarPoly(-1).format()
+		   >>> Polynomial(-1).format()
 		   '-1'
-		   >>> UniVarPoly([0,1]).format()
+		   >>> Polynomial([0,1]).format()
 		   'x'
-		   >>> UniVarPoly([0,-1]).format()
+		   >>> Polynomial([0,-1]).format()
 		   '-x'
-		   >>> UniVarPoly([0,2]).format()
+		   >>> Polynomial([0,2]).format()
 		   '2x'
-		   >>> UniVarPoly([1,2]).format()
+		   >>> Polynomial([1,2]).format()
 		   '2x + 1'
-		   >>> UniVarPoly([1,0,1]).format()
+		   >>> Polynomial([1,0,1]).format()
 		   'x^2 + 1'
-		   >>> UniVarPoly([-1,-1,-1]).format()
+		   >>> Polynomial([-1,-1,-1]).format()
 		   '-x^2 - x - 1'
-		   >>> UniVarPoly([1.0]).format()
+		   >>> Polynomial([1.0]).format()
 		   '1'
-		   >>> UniVarPoly([0.0, -1.0]).format()
+		   >>> Polynomial([0.0, -1.0]).format()
 		   '-x'
-		   >>> UniVarPoly([2,0,-2], 'y').format()
+		   >>> Polynomial([2,0,-2], 'y').format()
 		   '-2y^2 + 2'
-		   >>> UniVarPoly([0.0001,0.9999]).format(coeffPrec=3)
+		   >>> Polynomial([0.0001,0.9999]).format(coeffPrec=3)
 		   'x'
-		   >>> UniVarPoly([2,2,-1]).format(opMul='*')
+		   >>> Polynomial([2,2,-1]).format(opMul='*')
 		   '-x^2 + 2*x + 2'
-		   >>> UniVarPoly([2,0,-1]).format(opPow='**')
+		   >>> Polynomial([2,0,-1]).format(opPow='**')
 		   '-x**2 + 2'
-		   >>> UniVarPoly([-1,0,-1]).format(termOrderAsc=True)
+		   >>> Polynomial([-1,0,-1]).format(termOrderAsc=True)
 		   '-1 - x^2'
-		   >>> UniVarPoly([2,0,-2]).format(termSep='')
+		   >>> Polynomial([2,0,-2]).format(termSep='')
 		   '-2x^2+2'
 		'''
 		idxStart,idxEnd,idxIncr = (0,len(self.coeffs),1) if termOrderAsc else (len(self.coeffs)-1,-1,-1)
@@ -690,7 +692,7 @@ class UniVarPoly:
 		for i in range(idxStart, idxEnd, idxIncr):
 			ci = self.coeffs[i]
 			isHighestPower = i == self.deg()
-			ciRepr = UniVarPoly._coeffRepr(ci, coeffPrec, signedZero=isHighestPower, opMul=opMul, opPow=opPow, termOrderAsc=termOrderAsc, termSep=termSep)
+			ciRepr = Polynomial._coeffRepr(ci, coeffPrec, signedZero=isHighestPower, opMul=opMul, opPow=opPow, termOrderAsc=termOrderAsc, termSep=termSep)
 			if ciRepr == '0': continue
 			coeffShown = False
 			if strRepr:
@@ -699,7 +701,7 @@ class UniVarPoly:
 				termComb = '-' if extractMinus else '+'
 				strRepr += '%s%s%s' % (termSep, termComb, termSep)
 				if ciRepr != '1' or i == 0:
-					parenthesizeCoeff = isinstance(ci, UniVarPoly) and not extractMinus and ('+' in ciRepr or '-' in ciRepr) and (i>0 or ciRepr.startswith('-'))
+					parenthesizeCoeff = isinstance(ci, Polynomial) and not extractMinus and ('+' in ciRepr or '-' in ciRepr) and (i>0 or ciRepr.startswith('-'))
 					if parenthesizeCoeff:
 						strRepr += '(%s)' % ciRepr
 					else:
@@ -707,7 +709,7 @@ class UniVarPoly:
 					coeffShown = True
 			else:
 				if ciRepr != '1' or i == 0:
-					if isinstance(ci, UniVarPoly) and ('+' in ciRepr or '-' in ciRepr[1:]) and i > 0:
+					if isinstance(ci, Polynomial) and ('+' in ciRepr or '-' in ciRepr[1:]) and i > 0:
 						strRepr = '(%s)' % ciRepr
 						coeffShown = True
 					elif ciRepr == '-1' and i>0:
@@ -726,14 +728,14 @@ class UniVarPoly:
 	def __str__(self):
 		'''overload conversion to string
 		
-		   >>> str(UniVarPoly([-1, 1]))
+		   >>> str(Polynomial([-1, 1]))
 		   'x - 1'
 		'''
 		return self.format(coeffPrec=None, opMul='', opPow='^', termOrderAsc=False, termSep=' ')
 
 
 	def __repr__(self):
-		return "<UniVarPoly '%s'>" % self
+		return "<Polynomial '%s'>" % self
 
 
 	@staticmethod
@@ -746,11 +748,11 @@ class UniVarPoly:
 						eps = 1e-10
 					ceq = c1 == c2 if eps is None or eps == 0 else abs(c1 - c2) < eps
 					if not ceq: return False
-				elif isinstance(c2, UniVarPoly):
+				elif isinstance(c2, Polynomial):
 					if not c2.__eq__(c1, eps): return False
 				else:
 					raise ValueError("_eqCoeffs: unexpected coefficient type " + type(c2))
-			elif isinstance(c1, UniVarPoly):
+			elif isinstance(c1, Polynomial):
 				if not c1.__eq__(c2, eps): return False
 			else:
 				raise ValueError("_eqCoeffs: unexpected coefficient type " + type(c1))
@@ -761,28 +763,28 @@ class UniVarPoly:
 		'''overload operator ==
 		unset eps defaults to 1e-10 if floats are involved, exact comparison otherwise
 		
-		>>> UniVarPoly(0) == 0
+		>>> Polynomial(0) == 0
 		True
-		>>> UniVarPoly(1) == 1
+		>>> Polynomial(1) == 1
 		True
-		>>> UniVarPoly('x') == 0
+		>>> Polynomial('x') == 0
 		False
-		>>> UniVarPoly('x') == symbol('x')
+		>>> Polynomial('x') == symbol('x')
 		True
 		>>> symbol('x') == symbol('y')
 		False
 		'''
 		if isinstance(poly, numbers.Number):
-			return UniVarPoly._eqCoeffs(self.coeffs, [poly], eps)
+			return Polynomial._eqCoeffs(self.coeffs, [poly], eps)
 		if isinstance(poly, list):
 			coeffs = poly
-		elif isinstance(poly, UniVarPoly):
+		elif isinstance(poly, Polynomial):
 			if self.varName != poly.varName and max(len(self.coeffs), len(poly.coeffs)) > 1:
 				return False
 			coeffs = poly.coeffs
 		else:
 			raise ValueError("__eq__: unexpected argument type " + type(poly))
-		return UniVarPoly._eqCoeffs(self.coeffs, coeffs, eps)
+		return Polynomial._eqCoeffs(self.coeffs, coeffs, eps)
 
 
 # create identity polynomials for given variable name (e.g. polynomial x for variable name 'x')
@@ -790,18 +792,18 @@ def symbol(varName='x'):
 	'''generate simplest polynomials given a variable name
 	
 	>>> symbol()
-	<UniVarPoly 'x'>
+	<Polynomial 'x'>
 	>>> symbol('y')
-	<UniVarPoly 'y'>
+	<Polynomial 'y'>
 	'''
-	return UniVarPoly([0,1], varName=varName.strip())
+	return Polynomial([0,1], varName=varName.strip())
 
 def symbols(varNames):
 	'''generate several symbols in one call
 	
 	>>> x,y = symbols('x,y')
 	>>> x+y
-	<UniVarPoly 'y + x'>
+	<Polynomial 'y + x'>
 	'''
 	return [symbol(v) for v in re.split('[, \t]+', varNames)]
 
@@ -810,11 +812,11 @@ def poly(polyStr):
 	'''generate polynomial from string
 	
 	>>> poly('x')
-	<UniVarPoly 'x'>
+	<Polynomial 'x'>
 	>>> poly('(x+y)^2')
-	<UniVarPoly 'y^2 + 2xy + x^2'>
+	<Polynomial 'y^2 + 2xy + x^2'>
 	'''
-	return UniVarPoly.fromString(polyStr)
+	return Polynomial.fromString(polyStr)
 
 
 def _selfTest():

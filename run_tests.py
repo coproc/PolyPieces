@@ -1,61 +1,44 @@
-#! /usr/bin/env python3.8
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Run all tests below the containing directory and display the result.
+"""
+Run all unit tests and display the result.
+The test folder and subdirectories will be searched for *test*.py files.
 
-The subdirectories will be searched for *test*.py files.
-
-If an argument is given (e.g. "autorun"), the script terminates itself after
-running tests.
+If an argument is given (e.g. "autorun"), the script terminates immediately after running tests.
 """
 
 import os
 import sys
 import unittest
 
-assert sys.version_info[:2] == (3, 8)
-
-
 TEST_FILE_PATTERN = '*test*.py'
 
 
-def discoverAndRunTests(path):
-	"""Return all test results from the discovered tests.
+def discover_and_run_tests(rootPath):
+	"""Return test summary of discovered tests.
+	Start test discovery and run all tests found.
 	
-	Start test discovery and runs all tests which are found in test classes.
+	args:
+		rootPath (str): path to root of tests
 	
-	Args:
-		path (str): Parameter for test discovery, which requires an
-			absolute path.
-	
-	Returns:
-		A test result summary object on all test runs.
+	returns:
+		test result summary object on all tests run.
 	"""
-	testSuite = unittest.defaultTestLoader.discover(path, TEST_FILE_PATTERN)
+	testSuite = unittest.defaultTestLoader.discover(rootPath, TEST_FILE_PATTERN)
 	testRunner = unittest.TextTestRunner(resultclass=unittest.TextTestResult, verbosity=0)
 	result = testRunner.run(testSuite)
 	return result
 
 
-def printResult(result):
-	print()
-	print(result)
-	if result.wasSuccessful():
-		print()
-		print("All tests successful!")
-
-
 if __name__ == '__main__':
 	thisDir = os.path.dirname(__file__)
+	testDir = os.path.join(thisDir, 'test')
+	testResult = discover_and_run_tests(testDir)
+	print('\n', testResult)
 	
-	testResult = discoverAndRunTests(thisDir)
-	printResult(testResult)
-	
-	# For automation, an arbitrary argument (e.g. "autorun") can be given to
-	# quit without user interaction:
-	if len(sys.argv) < 2:
+	# To keep an automatically opened shell window open, pressing 'ENTER' is required to terminate
+	# the script if no arguments have been given. Any argument will quit without user interaction.
+	if len(sys.argv) == 1:
 		input("\nPress ENTER to exit.")
-	
-	if testResult.wasSuccessful():
-		sys.exit(0)
-	else:
-		sys.exit(1)
+
+	sys.exit(0 if testResult.wasSuccessful() else 1)

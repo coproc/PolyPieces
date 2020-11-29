@@ -3,7 +3,7 @@
 import sys
 import numbers
 from fractions import Fraction
-from UniVarPoly import UniVarPoly
+from Polynomial import Polynomial
 
 
 class PolyPiece:
@@ -17,14 +17,14 @@ class PolyPiece:
 				try:
 					poly,interval = poly
 					PolyPiece(poly, interval) # check if arguments are valid
-					self.poly = poly if isinstance(poly,UniVarPoly) else UniVarPoly(poly)
+					self.poly = poly if isinstance(poly,Polynomial) else Polynomial(poly)
 					self.interval = interval
 				except Exception:
 					raise TypeError("PolyPiece cannot be constructed from '%s'" % [poly])
 		elif len(interval) == 2 and all([isinstance(n, numbers.Real) for n in interval]):
 			if  interval[1] < interval[0]:
 				raise ValueError("cannot create PolyPiece: invalid interval '%s'" % interval)
-			self.poly = poly if isinstance(poly, UniVarPoly) else UniVarPoly(poly)
+			self.poly = poly if isinstance(poly, Polynomial) else Polynomial(poly)
 			self.interval = interval
 		else:
 			raise TypeError("cannot create PolyPiece, this is not an interval of reals: '%s'" % interval)
@@ -38,7 +38,7 @@ class PolyPiece:
 		     x,      x in [0,1]
 		     -x + 2, x in [1,2]
 		     0, else
-		   >>> p_x = UniVarPoly([0, 1])
+		   >>> p_x = Polynomial([0, 1])
 		   >>> pp1 = PolyPiece(p_x, [0,1])
 		   >>> print(pp1.conv(pp1))
 		   f(x) =
@@ -89,7 +89,7 @@ class PolyPiece:
 		p2_dk = pp.poly
 		if p2_dk == 0: return PolyPieceFunc()
 		p1int_k = self.poly.int()
-		ppl_conv = [PolyPiece(UniVarPoly(), xLimits[i:i+2]) for i in range(len(tIntervals))]
+		ppl_conv = [PolyPiece(Polynomial(), xLimits[i:i+2]) for i in range(len(tIntervals))]
 		while True:
 			for j,tLimits in enumerate(tIntervals):
 				for i,t in enumerate(tLimits):
@@ -110,8 +110,8 @@ class PolyPiece:
 
 
 	def __str__(self, prec=None):
-		aRepr = UniVarPoly._coeffRepr(self.interval[0], prec)
-		bRepr = UniVarPoly._coeffRepr(self.interval[1], prec)
+		aRepr = Polynomial._coeffRepr(self.interval[0], prec)
+		bRepr = Polynomial._coeffRepr(self.interval[1], prec)
 		return "%s, x in [%s,%s]" % (self.poly, aRepr, bRepr)
 
 
@@ -123,7 +123,7 @@ class PolyPieceFunc:
 	   f(x) =
 	     1, x in [0,1]
 	     0, else
-	   >>> from UniVarPoly import symbol
+	   >>> from Polynomial import symbol
 	   >>> x = symbol()
 	   >>> fpp = PolyPieceFunc(((x,[0,1]), (1-x,[1,2])))
 	   >>> print(fpp)
@@ -227,13 +227,13 @@ class PolyPieceFunc:
 		   >>> fpp1 = PolyPieceFunc([PolyPiece(1, [0,1])])
 		   >>> fpp1._isContinuous()
 		   False
-		   >>> fpp2 = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]),[0,1]), PolyPiece(UniVarPoly([2,-1]),[1,2])])
+		   >>> fpp2 = PolyPieceFunc([PolyPiece(Polynomial([0,1]),[0,1]), PolyPiece(Polynomial([2,-1]),[1,2])])
 		   >>> fpp2._isContinuous()
 		   True
 		'''
 		assert(self._isConsistent(printFailReason=printFailReason))
 		if len(self.polyPieces) == 0: return True
-		ppPrev = PolyPiece(UniVarPoly(), [-float('inf'),self.polyPieces[0].interval[0]])
+		ppPrev = PolyPiece(Polynomial(), [-float('inf'),self.polyPieces[0].interval[0]])
 		for i,pp in enumerate(self.polyPieces):
 			x0 = pp.interval[0]
 			valPrev = ppPrev.poly.eval(x0) if abs(x0 - ppPrev.interval[1]) < prec else 0
@@ -249,36 +249,36 @@ class PolyPieceFunc:
 	def _selectPP(self, x0, idxStart=0):
 		'''return (first) polynomial piece containing x0 in its definition range
 		
-		   >>> pp1 = PolyPiece(UniVarPoly([0,1]), [-1,1])
-		   >>> pp2 = PolyPiece(UniVarPoly([0,2]), [ 1,2])
+		   >>> pp1 = PolyPiece(Polynomial([0,1]), [-1,1])
+		   >>> pp2 = PolyPiece(Polynomial([0,2]), [ 1,2])
 		   >>> fpp = PolyPieceFunc([pp1, pp2])
 		   >>> fpp._isConsistent()
 		   True
 		   >>> fpp._selectPP(-2)
-		   (<UniVarPoly '0'>, 0)
+		   (<Polynomial '0'>, 0)
 		   >>> fpp._selectPP(-1)
-		   (<UniVarPoly 'x'>, 0)
+		   (<Polynomial 'x'>, 0)
 		   >>> fpp._selectPP(1)
-		   (<UniVarPoly 'x'>, 0)
+		   (<Polynomial 'x'>, 0)
 		   >>> fpp._selectPP(2)
-		   (<UniVarPoly '2x'>, 1)
+		   (<Polynomial '2x'>, 1)
 		'''
-		if idxStart >= len(self.polyPieces):          return UniVarPoly(),idxStart
-		if x0 < self.polyPieces[idxStart].interval[0]: return UniVarPoly(),idxStart
+		if idxStart >= len(self.polyPieces):          return Polynomial(),idxStart
+		if x0 < self.polyPieces[idxStart].interval[0]: return Polynomial(),idxStart
 		for i,pp in enumerate(self.polyPieces[idxStart:]):
 			intv,pi = pp.interval, pp.poly
 			if intv[0] > x0:
-				return UniVarPoly(), idxStart+i
+				return Polynomial(), idxStart+i
 			if x0 <= intv[1]:
 				return pi, idxStart+i
-		return UniVarPoly(), idxStart+len(self.polyPieces)
+		return Polynomial(), idxStart+len(self.polyPieces)
 
 
 	def eval(self, x0):
 		'''evaluate at x=x0
 		
-		   >>> pp1 = PolyPiece(UniVarPoly([0,1]), [-1,1])
-		   >>> pp2 = PolyPiece(UniVarPoly([0,2]), [ 1,2])
+		   >>> pp1 = PolyPiece(Polynomial([0,1]), [-1,1])
+		   >>> pp2 = PolyPiece(Polynomial([0,2]), [ 1,2])
 		   >>> fpp = PolyPieceFunc([pp1, pp2])
 		   >>> fpp.eval(-2)
 		   0
@@ -304,7 +304,7 @@ class PolyPieceFunc:
 		   Only implemented for numbers and linear polynomials.
 		
 		   >>> fpp = PolyPieceFunc([PolyPiece(1, [0,1])])
-		   >>> p1 = UniVarPoly([-1,1])
+		   >>> p1 = Polynomial([-1,1])
 		   >>> fpp2 = fpp.comp(p1)
 		   >>> x0Vals = [-1, -0.5, 0, 0.5, 1, 1.5, 2]
 		   >>> all(map(lambda x0: fpp2.eval(x0) == fpp.eval(p1.eval(x0)), x0Vals))
@@ -312,7 +312,7 @@ class PolyPieceFunc:
 		'''
 		if isinstance(p, numbers.Number):
 			return self.eval(p)
-		if not isinstance(p, UniVarPoly):
+		if not isinstance(p, Polynomial):
 			raise ValueError("unexpected type '%s' for composition" % type(p))
 		if p.deg() == 0:
 			return self.eval(p.coeffs[0])
@@ -352,7 +352,7 @@ class PolyPieceFunc:
 	def _binArithOp(self, op2, opFunc):
 		'''implement a binary arithmetic operation with a number, a polynomial or another piecewise polynomial function.
 		'''
-		allowedOpTypes = [numbers.Number, UniVarPoly, PolyPieceFunc]
+		allowedOpTypes = [numbers.Number, Polynomial, PolyPieceFunc]
 		if not any(map(lambda t: isinstance(op2, t), allowedOpTypes)):
 			raise ValueError("arithmetic operator of invalid type '%s'" % type(op2))
 		xl = []
@@ -381,7 +381,7 @@ class PolyPieceFunc:
 	def __add__(self, op2):
 		'''overload operator +
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> fpp = PolyPieceFunc([PolyPiece(Polynomial([0,1]), [0,1])])
 		   >>> print(fpp + 1)
 		   f(x) =
 		     x + 1, x in [0,1]
@@ -410,7 +410,7 @@ class PolyPieceFunc:
 	def __pos__(self):
 		'''overload unary operator +
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> fpp = PolyPieceFunc([PolyPiece(Polynomial([0,1]), [0,1])])
 		   >>> print(+fpp)
 		   f(x) =
 		     x, x in [0,1]
@@ -422,7 +422,7 @@ class PolyPieceFunc:
 	def __neg__(self):
 		'''overload unary operator -
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> fpp = PolyPieceFunc([PolyPiece(Polynomial([0,1]), [0,1])])
 		   >>> print(-fpp)
 		   f(x) =
 		     -x, x in [0,1]
@@ -434,7 +434,7 @@ class PolyPieceFunc:
 	def __sub__(self, op2):
 		'''overload operator -
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> fpp = PolyPieceFunc([PolyPiece(Polynomial([0,1]), [0,1])])
 		   >>> print(fpp - 1)
 		   f(x) =
 		     x - 1, x in [0,1]
@@ -457,7 +457,7 @@ class PolyPieceFunc:
 	def __rsub__(self, op1):
 		'''overload operator + for right hand side
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> fpp = PolyPieceFunc([PolyPiece(Polynomial([0,1]), [0,1])])
 		   >>> print(1 - fpp)
 		   f(x) =
 		     -x + 1, x in [0,1]
@@ -469,7 +469,7 @@ class PolyPieceFunc:
 	def __mul__(self, op2):
 		'''overload operator *
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> fpp = PolyPieceFunc([PolyPiece(Polynomial([0,1]), [0,1])])
 		   >>> print(fpp * 2)
 		   f(x) =
 		     2x, x in [0,1]
@@ -499,7 +499,7 @@ class PolyPieceFunc:
 		'''overload operators /, /=
 		   (divisor must be number)
 		
-		   >>> fpp = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]), [0,1])])
+		   >>> fpp = PolyPieceFunc([PolyPiece(Polynomial([0,1]), [0,1])])
 		   >>> print(fpp / 2)
 		   f(x) =
 		     1/2x, x in [0,1]
@@ -518,10 +518,10 @@ class PolyPieceFunc:
 	def der(self):
 		'''derivative function
 		
-		   >>> p_1 = UniVarPoly([1])
-		   >>> p_x2 = UniVarPoly([0,0,1])
-		   >>> p_x_2 = UniVarPoly([2,1])
-		   >>> p_x__2 = UniVarPoly([-2,1])
+		   >>> p_1 = Polynomial([1])
+		   >>> p_x2 = Polynomial([0,0,1])
+		   >>> p_x_2 = Polynomial([2,1])
+		   >>> p_x__2 = Polynomial([-2,1])
 		   >>> fpp = PolyPieceFunc([PolyPiece(p_x2.comp(p_x_2),  [-2,-1]), 
 		   ...                      PolyPiece(2*p_1 - p_x2,      [-1, 1]), 
 		   ...                      PolyPiece(p_x2.comp(p_x__2), [ 1, 2])]) 
@@ -549,7 +549,7 @@ class PolyPieceFunc:
 		   >>> fpp1 = PolyPieceFunc([PolyPiece(1, [0,1])])
 		   >>> fpp1.intDef()
 		   1
-		   >>> fpp2 = PolyPieceFunc([PolyPiece(UniVarPoly([0,1]),[0,1]), PolyPiece(UniVarPoly([2,-1]),[1,2])])
+		   >>> fpp2 = PolyPieceFunc([PolyPiece(Polynomial([0,1]),[0,1]), PolyPiece(Polynomial([2,-1]),[1,2])])
 		   >>> fpp2.intDef([-1,3])
 		   1
 		   >>> fpp2.intDef([0.5,3])

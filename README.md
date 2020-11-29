@@ -78,4 +78,6 @@ f(x) =
 ```
 
 ## Tests
-See the doctests in the implementation files.
+See the doctests in the implementation files and the tests in folder [`test/`](https://github.com/coproc/PolyPieces/tree/master/test).
+The doctests can be invoked by running the corresponding implementation file. 
+The other tests can be invoked by running [`run_tests.py`](https://github.com/coproc/PolyPieces/tree/master/run_tests.py) in the root folder.

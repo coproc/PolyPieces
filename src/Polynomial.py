@@ -18,8 +18,6 @@ class Polynomial:
 		   If a single number is given instead of a list the corresponding constant
 		   polynomial is constructed.
 		   If a polynomial is given its coefficents are (deeply) copied.
-		   If a string is given it is evaluated as Python expression in the given
-		   variable (default: 'x').
 		   If no input is given the 0 polynomial is assumed.
 		   >>> p_0 = Polynomial()
 		   >>> p_0.coeffs
@@ -30,15 +28,12 @@ class Polynomial:
 		   >>> p_x2 = Polynomial([0,0,1]) # x^2
 		   >>> p_x2.coeffs
 		   [0, 0, 1]
-		   >>> p = Polynomial('(x-1)*(x+1)')
-		   >>> p.coeffs
-		   [-1, 0, 1]
-		   >>> p2 = Polynomial(p)
+		   >>> p = Polynomial(p_1)
 		   >>> p.coeffs.append(1)
-		   >>> p2.coeffs
-		   [-1, 0, 1]
 		   >>> p.coeffs
-		   [-1, 0, 1, 1]
+		   [1, 1]
+		   >>> p_1.coeffs
+		   [1]
 		'''
 		self.varName = varName
 		if isinstance(repr, Polynomial):
@@ -46,9 +41,6 @@ class Polynomial:
 			self.varName = repr.varName
 		elif isinstance(repr, numbers.Number):
 			self.coeffs = [repr]
-		elif isinstance(repr, str):
-			p = Polynomial.fromString(repr, varName)
-			self.coeffs = p.coeffs
 		else:
 			try:
 				iter(repr)
@@ -458,7 +450,7 @@ class Polynomial:
 	def __truediv__(self, d):
 		'''overload operators /, /=
 		
-		   >>> p1 = Polynomial('2x-1')
+		   >>> p1 = Polynomial.fromString('2x-1')
 		   >>> p = p1 / 5
 		   >>> p.coeffs
 		   [Fraction(-1, 5), Fraction(2, 5)]
@@ -546,10 +538,10 @@ class Polynomial:
 	def __call__(self, poly):
 		'''overload call operator (composition/substitution/evaluation)
 		
-		   >>> p1 = Polynomial('x**2+x-1')
+		   >>> p1 = Polynomial.fromString('x**2+x-1')
 		   >>> p1(0)
 		   -1
-		   >>> p2 = Polynomial('1-x')
+		   >>> p2 = Polynomial.fromString('1-x')
 		   >>> p1(p2).coeffs
 		   [1, -3, 1]
 		   >>> p1(p2)(p2).coeffs
@@ -767,9 +759,9 @@ class Polynomial:
 		True
 		>>> Polynomial(1) == 1
 		True
-		>>> Polynomial('x') == 0
+		>>> Polynomial.fromString('x') == 0
 		False
-		>>> Polynomial('x') == symbol('x')
+		>>> Polynomial.fromString('x') == symbol('x')
 		True
 		>>> symbol('x') == symbol('y')
 		False
@@ -808,7 +800,7 @@ def symbols(varNames):
 	return [symbol(v) for v in re.split('[, \t]+', varNames)]
 
 
-def poly(polyStr):
+def poly(polyStr, varNames=None):
 	'''generate polynomial from string
 	
 	>>> poly('x')
@@ -816,7 +808,7 @@ def poly(polyStr):
 	>>> poly('(x+y)^2')
 	<Polynomial 'y^2 + 2xy + x^2'>
 	'''
-	return Polynomial.fromString(polyStr)
+	return Polynomial.fromString(polyStr, varNames)
 
 
 def _selfTest():

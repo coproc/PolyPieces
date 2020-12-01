@@ -4,11 +4,13 @@ from src.Polynomial import Polynomial as Poly
 
 TEST_CASES_CREATION = [
 	('1', ([1], 'x')),
+	(('1', ['y']), ([1], 'y')),
 	('x', ([0, 1], 'x')),
 	('y', ([0, 1], 'y')),
 	('1-x', ([1, -1], 'x')),
 	('1-y', ([1, -1], 'y')),
 	('1-xy', ([1, ([0, -1], 'x')], 'y')),
+	(('1-xy', ['xy']), ([1, -1], 'xy')),
 	('(1-x)(1-y)', ([([1, -1], 'x'), ([-1, 1], 'x')], 'y'))
 ]
 	
@@ -35,7 +37,14 @@ class MultivarTests(unittest.TestCase):
 	def test_creation(self):
 		print('testing creation: ', end='')
 		for expr, polyStruct in TEST_CASES_CREATION:
-			p = Poly.fromString(expr)
-			self.assertPolyStruct(polyStruct, p)
-			print('.', end='')		
+			try:
+				p = Poly.fromString(expr) if isinstance(expr, str) else Poly.fromString(*expr)
+				self.assertPolyStruct(polyStruct, p)
+				print('.', end='')
+			except AssertionError:
+				print('F\n', end='')
+				raise
+			except:
+				print('E\n', end='')
+				raise
 		print()

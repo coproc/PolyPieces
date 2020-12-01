@@ -63,7 +63,7 @@ class Univar_PolyOps(unittest.TestCase):
 
 	def test_unaryFunctions(self):
 		for func,inOutData in TEST_CASES_UNARY.items():
-			print('testing %s: ' % func.__name__, end='')
+			print('testing univar_polyops.%s: ' % func.__name__, end='')
 			for output,input in inOutData:
 				self.assertEqual(output, func(input), 'testing %s = %s(%s)' % (output,func.__name__,input))
 				print('.', end='')
@@ -71,7 +71,7 @@ class Univar_PolyOps(unittest.TestCase):
 
 	def test_binaryFunctions(self):
 		for func,inOutData in TEST_CASES_BINARY.items():
-			print('testing %s: ' % func.__name__, end='')
+			print('testing univar_polyops.%s: ' % func.__name__, end='')
 			for output,input in inOutData:
 				self.assertEqual(output, func(*input), 'testing %s = %s(%s, %s)' % (output,func.__name__,*input))
 				print('.', end='')
@@ -84,7 +84,7 @@ class Univar_PolyOps_numpy(unittest.TestCase):
 
 	def test_unaryFunctions(self):
 		for func,inOutData in TEST_CASES_UNARY.items():
-			print('testing %s with numpy: ' % func.__name__, end='')
+			print('testing univar_polyops.%s with numpy: ' % func.__name__, end='')
 			for output,input in inOutData:
 				self.assertTrue(na_eq(na(output), func(na(input))), 'testing %s = %s(%s)' % (output,func.__name__,input))
 				print('.', end='')
@@ -92,7 +92,7 @@ class Univar_PolyOps_numpy(unittest.TestCase):
 
 	def test_binaryFunctions(self):
 		for func,inOutData in TEST_CASES_BINARY.items():
-			print('testing %s with numpy: ' % func.__name__, end='')
+			print('testing univar_polyops.%s with numpy: ' % func.__name__, end='')
 			for output,input in inOutData:
 				self.assertTrue(na_eq(na(output), func(*list(map(na,input)))), 'testing %s = %s(%s, %s)' % (output,func.__name__,*input))
 				print('.', end='')

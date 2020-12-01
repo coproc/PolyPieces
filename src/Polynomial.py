@@ -76,7 +76,8 @@ class Polynomial:
 			exprStr = re.sub(r'([a-zA-Z0-9)])[ \t]*([(a-zA-Z])', r'\1*\2', exprStr)
 		# assume exact arithmetic: division of integers is taken as Fraction;
 		exprStr = re.sub(r'([1-9][0-9]*)\s*/\s*([1-9][0-9]*)', r'Fraction(\1,\2)', exprStr)
-		return eval(exprStr, None, {v: symbol(v) for v in varNames})
+		p = eval(exprStr, None, {v: symbol(v) for v in varNames})
+		return p if isinstance(p, Polynomial) else Polynomial([p])
 
 
 	def deg(self, varName=None):
@@ -775,7 +776,7 @@ class Polynomial:
 				return False
 			coeffs = poly.coeffs
 		else:
-			raise ValueError("__eq__: unexpected argument type " + type(poly))
+			raise ValueError("__eq__: unexpected argument type %s" % type(poly))
 		return Polynomial._eqCoeffs(self.coeffs, coeffs, eps)
 
 

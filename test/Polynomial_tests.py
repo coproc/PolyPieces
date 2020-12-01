@@ -11,9 +11,10 @@ TEST_CASES_CREATION = [
 	('1-y',	([1, -1], 'y')),
 	('1-xy',	([1, ([0, -1], 'x')], 'y')),
 	(('1-xy', ['xy']),	([1, -1], 'xy')),
-	('(1-x)(1-y)',	([([1, -1], 'x'), ([-1, 1], 'x')], 'y'))
+	('(1-x)(1-y)',	([([1, -1], 'x'), ([-1, 1], 'x')], 'y')),
+	('(x+y+z)^2',	([([([0,0,1], 'x'), ([0,2], 'x'), 1], 'y'), ([([0,2], 'x'), 2], 'y'), 1], 'z'))
 ]
-	
+
 
 class MultivarTests(unittest.TestCase):
 
@@ -21,7 +22,7 @@ class MultivarTests(unittest.TestCase):
 		if depthPath	is None: depthPath = []
 		if rootStruct	is None: rootStruct = polyStruct
 		if rootPoly	is None: rootPoly = p
-		whileMsg = ('while checking coeff %s of %s ~ %s' % 
+		whileMsg = (' while checking coeff %s of %s ~ %s' % 
 				(' of coeff '.join([str(d) for d in depthPath]), rootStruct, rootPoly))\
 			if depthPath else ''
 		coeffsExp,varNameExp = polyStruct

@@ -48,7 +48,7 @@ class Polynomial:
 				if len(self.coeffs) == 0: self.coeffs.append(0)
 				self._normalize()
 			except TypeError:
-				raise TypeError('unexpected type "%s" when constructing polynomial' % type(coeffs))
+				raise TypeError('unexpected type "%s" when constructing polynomial' % type(repr))
 			
 
 	@staticmethod
@@ -95,7 +95,7 @@ class Polynomial:
 		   2
 		'''
 		if varName is None or varName == self.varName:
-			return len(self.coeffs) - 1
+			return -1 if self.coeffs == [0] else len(self.coeffs) - 1
 		if varName < self.varName: return 0 # optimization
 		return max([c.deg(varName) for c in self.coeffs if isinstance(c, Polynomial)], default=0)
 

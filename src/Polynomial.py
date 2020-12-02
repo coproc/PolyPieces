@@ -576,7 +576,10 @@ class Polynomial:
 		if varName > self.varName:
 			return Polynomial(varName=varName)
 		coeffsDer = [c.der(varName) if isinstance(c, Polynomial) else 0 for c in self.coeffs]
-		return Polynomial(coeffsDer, varName=self.varName)
+		pDer = Polynomial(coeffsDer, varName=self.varName)
+		# coeffsDer could have zero leading coefficients; pDer.coeffs is normalized
+		if len(pDer.coeffs) <= 1: pDer.varName = varName
+		return pDer
 
 
 	def int(self, interval=None, varName=None):

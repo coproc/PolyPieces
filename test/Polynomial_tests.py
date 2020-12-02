@@ -42,8 +42,7 @@ def _createPoly(repr):
 
 class MultivarTests(unittest.TestCase):
 
-
-	def assertPolyStruct(self, polyStruct, p, depthPath=None, rootStruct=None, rootPoly=None):
+	def _assertPolyStruct(self, polyStruct, p, depthPath=None, rootStruct=None, rootPoly=None):
 		if depthPath	is None: depthPath = []
 		if rootStruct	is None: rootStruct = polyStruct
 		if rootPoly	is None: rootPoly = p
@@ -57,7 +56,7 @@ class MultivarTests(unittest.TestCase):
 			'testing coeff count in %s ~ %s%s' % (polyStruct, p, whileMsg))
 		for idx,(cExp,cPoly) in enumerate(zip(coeffsExp, p.coeffs)):
 			if isinstance(cExp, tuple) and isinstance(cPoly, Poly):
-				self.assertPolyStruct(cExp, cPoly, [idx]+depthPath, rootStruct, rootPoly)
+				self._assertPolyStruct(cExp, cPoly, [idx]+depthPath, rootStruct, rootPoly)
 			else:
 				self.assertEqual(cExp, cPoly,
 					'testing coeff %d in %s ~ %s%s' % (idx, polyStruct, p, whileMsg))
@@ -67,7 +66,7 @@ class MultivarTests(unittest.TestCase):
 		for expr, polyStruct in TEST_CASES_CREATION:
 			try:
 				p = _createPoly(expr)
-				self.assertPolyStruct(polyStruct, p)
+				self._assertPolyStruct(polyStruct, p)
 				print('.', end='')
 			except AssertionError:
 				print('F\n', end='')
@@ -85,8 +84,9 @@ class MultivarTests(unittest.TestCase):
 				p = _createPoly(polyRepr)
 				f_p = func(p)
 				if f_p is None:
+					# function changes polynomial; compare polynomial with expected output
 					if isinstance(outputExp, list): outputExp = (outputExp, 'x')
-					self.assertPolyStruct(outputExp, p)
+					self._assertPolyStruct(outputExp, p)
 				else:
 					self.assertEqual(outputExp, f_p, 'testing %s = %s.%s()' % (outputExp, p, func.__name__))
 				print('.', end='')

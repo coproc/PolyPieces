@@ -24,15 +24,35 @@ TEST_CASES_NULLARY = {
 		( 2, [0,0,-1])
 	],
 	Poly._normalize: [
-		# unary polys
+		# univariate polys
 		([],	[]),
 		([],	[0]),
 		([1],	[1,0]),
 		([0,-1],	[0,-1,0,0]),
+		# multivariate polys: remove zero leading terms in all layers
+		(([0, ([0,2], 'x')], 'y'), '(x^2+2xy+y^2)-x^2-y^2'), # = 2xy
+		# multivariate polys: remove (layers with) variables with only constant terms
+		(([([0,1], 'x'), 1], 'z'), '(x+y+z) - y') # = x + z
+	],
+	Poly.der: [
+		# univariate polys
+		([],	[]),
+		([],	[0]),
+		([],	[1]),
+		([1],	[0,1]),
+		([0,2],	[0,0,1]),
 		# multivariate polys
-		(([0, ([0,2], 'x')], 'y'), '(x+y)^2-x^2-y^2'), # = 2xy
-		(([([0,0,1], 'x'), ([0,2], 'x'), 1], 'z'), '(x+y+z)(x-y+z)+y^2') # = x^2 + 2xz + z^2
-	]
+		(([0, ([0,2], 'y')], 'z'), '1+yz^2') # d(1+yz^2)/dz = 2yz
+	],
+	Poly.intIndef: [
+		# univariate polys
+		([],	[]),
+		([],	[0]),
+		([0,1],	[1]),
+		([0,0,1],	[0,2]),
+		# multivariate polys
+		(([0, 1, ([0,1], 'y')], 'z'), '1+2yz') # int(1+2yz)dz = z+yz^2
+	],
 }
 
 
@@ -84,15 +104,15 @@ class PolynomialTests(unittest.TestCase):
 	def test_nullaryMethods(self):
 		for func,inOutData in TEST_CASES_NULLARY.items():
 			print('testing Polynomial.%s: ' % func.__name__, end='')
-			for outputExp,polyRepr in inOutData:
+			for resultExp,polyRepr in inOutData:
 				p = _createPoly(polyRepr)
 				f_p = func(p)
-				if f_p is None:
+				result = p if f_p is None else f_p
+				if isinstance(result, Poly):
 					# function changes polynomial; compare polynomial with expected output
-					if isinstance(outputExp, list): outputExp = (outputExp, 'x')
-					self._assertPolyStruct(outputExp, p)
+					if isinstance(resultExp, list): resultExp = (resultExp, 'x')
+					self._assertPolyStruct(resultExp, result)
 				else:
-					self.assertEqual(outputExp, f_p, 'testing %s = %s.%s()' % (outputExp, p, func.__name__))
+					self.assertEqual(resultExp, result, 'testing %s = %s.%s()' % (resultExp, p, func.__name__))
 				print('.', end='')
 			print()
-

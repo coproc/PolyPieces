@@ -493,7 +493,7 @@ class Polynomial:
 
 
 	def __pow__(self, e):
-		'''overlaod operator ** (exponentiation)
+		'''overload operator ** (exponentiation)
 
 		   >>> p = Polynomial([-1,1])
 		   >>> p2 = p**2

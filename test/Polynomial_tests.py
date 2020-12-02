@@ -62,6 +62,18 @@ TEST_CASES_UNARY = {
 		(0,	('x', 'y')),
 		(0,	('y', 'x'))
 	],
+	Poly.eval: [
+		(0,	('x', 0)),
+		(1,	('x', 1)),
+		(-1,	('x', -1)),
+		(1,	('x^2', -1)),
+		(0,	('x^2+x', -1)),
+		([0,1],	('x+y', 0)),
+		([2,1],	('x+y', 2)),
+	],
+	Poly.comp: [
+		(([5], 'y'),	('x+y', {'x':2, 'y':3})),
+	],
 	Poly.der: [
 		([1],	('x', 'x')),
 		(([], 'y'),	('x', 'y')),
@@ -77,6 +89,26 @@ TEST_CASES_UNARY = {
 	]
 }
 
+
+TEST_CASES_BINARY = {
+	Poly.iadd: [
+		([1,0,1],	('x-1', 'x^2-x+2')), # x^2+1 = (x-1) + (x^2-x+2)
+		(([([0,1], 'x'), 1],'y'),	('x', 'y')),
+	],
+	Poly.isub: [
+		([-3,2,-1],	('x-1', 'x^2-x+2')), # -x^2+2x-3 = (x-1) - (x^2-x+2)
+		(([([0,1], 'x'), -1],'y'),	('x', 'y')),
+	],
+	Poly.imul: [
+		([-1,0,1],	('x-1', 'x+1')),
+		(([0, ([0,1], 'x')],'y'),	('x', 'y')),
+	],
+	Poly.comp: [
+		([0,1],	('y', 'x')),
+		(([0,1], 'y'),	('x', 'y')),
+		([-1,3,-3,1],	('x^3', 'x-1')),
+	]
+}
 
 def _createPoly(repr):
 	if isinstance(repr, Poly): return repr
@@ -143,7 +175,7 @@ class PolynomialTests(unittest.TestCase):
 					raise
 				except:
 					print('E\n', end='')
-					raise					
+					raise
 			print()
 
 
@@ -167,7 +199,31 @@ class PolynomialTests(unittest.TestCase):
 					raise
 				except:
 					print('E\n', end='')
-					raise					
+					raise
+			print()
+
+	def test_binaryMethods(self):
+		for func,inOutData in TEST_CASES_BINARY.items():
+			print('testing Polynomial.%s (binary): ' % func.__name__, end='')
+			for resultExp,(polyRepr,argPolyRepr) in inOutData:
+				try:
+					p = _createPoly(polyRepr)
+					pa = _createPoly(argPolyRepr)
+					f_p = func(p, pa)
+					# if there is no return value, method has changed polynomial
+					result = p if f_p is None else f_p
+					if isinstance(result, Poly):
+						if isinstance(resultExp, list): resultExp = (resultExp, 'x')
+						self._assertPolyStruct(resultExp, result)
+					else:
+						self.assertEqual(resultExp, result, 'testing %s = %s.%s(%s)' % (resultExp, p, func.__name__, pa))
+					print('.', end='')
+				except AssertionError:
+					print('F\n', end='')
+					raise
+				except:
+					print('E\n', end='')
+					raise
 			print()
 
 #	def test_special(self):

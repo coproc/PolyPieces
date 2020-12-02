@@ -66,6 +66,14 @@ TEST_CASES_UNARY = {
 		([1],	('x', 'x')),
 		(([], 'y'),	('x', 'y')),
 		([],	('y', 'x'))
+	],
+	Poly.intIndef: [
+		([0,1],	('1', 'x')),
+		(([0,1], 'y'),	('1', 'y')),
+		(([0, ([0,1], 'x')], 'y'),	('y', 'x')),
+		(([0, ([0,1], 'x')], 'y'),	('x', 'y')),
+		(([0, ([0,0,1], 'x')], 'y'),	('2xy', 'x')), # int(2xy)dx = x^2y
+		(([0, 0, ([0,1], 'x')], 'y'),	('2xy', 'y')), # int(2xy)dy = xy^2
 	]
 }
 
@@ -161,7 +169,7 @@ class PolynomialTests(unittest.TestCase):
 					print('E\n', end='')
 					raise					
 			print()
-	
+
 #	def test_special(self):
 #		print('testing special: ', end='')
 #		p = _createPoly('y')

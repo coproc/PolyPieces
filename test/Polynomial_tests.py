@@ -40,7 +40,7 @@ def _createPoly(repr):
 	raise TypeError('cannot create polynomial from type %s (%s)' % (type(repr), repr))
 
 
-class MultivarTests(unittest.TestCase):
+class PolynomialTests(unittest.TestCase):
 
 	def _assertPolyStruct(self, polyStruct, p, depthPath=None, rootStruct=None, rootPoly=None):
 		if depthPath	is None: depthPath = []

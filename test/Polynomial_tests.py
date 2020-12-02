@@ -52,7 +52,21 @@ TEST_CASES_NULLARY = {
 		([0,0,1],	[0,2]),
 		# multivariate polys
 		(([0, 1, ([0,1], 'y')], 'z'), '1+2yz') # int(1+2yz)dz = z+yz^2
+	]
+}
+
+
+TEST_CASES_UNARY = {
+	Poly.deg: [
+		(1,	('x', 'x')),
+		(0,	('x', 'y')),
+		(0,	('y', 'x'))
 	],
+	Poly.der: [
+		([1],	('x', 'x')),
+		(([], 'y'),	('x', 'y')),
+		([],	('y', 'x'))
+	]
 }
 
 
@@ -103,16 +117,55 @@ class PolynomialTests(unittest.TestCase):
 
 	def test_nullaryMethods(self):
 		for func,inOutData in TEST_CASES_NULLARY.items():
-			print('testing Polynomial.%s: ' % func.__name__, end='')
+			print('testing Polynomial.%s (nullary): ' % func.__name__, end='')
 			for resultExp,polyRepr in inOutData:
-				p = _createPoly(polyRepr)
-				f_p = func(p)
-				result = p if f_p is None else f_p
-				if isinstance(result, Poly):
-					# function changes polynomial; compare polynomial with expected output
-					if isinstance(resultExp, list): resultExp = (resultExp, 'x')
-					self._assertPolyStruct(resultExp, result)
-				else:
-					self.assertEqual(resultExp, result, 'testing %s = %s.%s()' % (resultExp, p, func.__name__))
-				print('.', end='')
+				try:
+					p = _createPoly(polyRepr)
+					f_p = func(p)
+					# if there is no return value, method has changed polynomial
+					result = p if f_p is None else f_p
+					if isinstance(result, Poly):
+						if isinstance(resultExp, list): resultExp = (resultExp, 'x')
+						self._assertPolyStruct(resultExp, result)
+					else:
+						self.assertEqual(resultExp, result, 'testing %s = %s.%s()' % (resultExp, p, func.__name__))
+					print('.', end='')
+				except AssertionError:
+					print('F\n', end='')
+					raise
+				except:
+					print('E\n', end='')
+					raise					
 			print()
+
+
+	def test_unaryMethods(self):
+		for func,inOutData in TEST_CASES_UNARY.items():
+			print('testing Polynomial.%s (unary): ' % func.__name__, end='')
+			for resultExp,(polyRepr,arg) in inOutData:
+				try:
+					p = _createPoly(polyRepr)
+					f_p = func(p, arg)
+					# if there is no return value, method has changed polynomial
+					result = p if f_p is None else f_p
+					if isinstance(result, Poly):
+						if isinstance(resultExp, list): resultExp = (resultExp, 'x')
+						self._assertPolyStruct(resultExp, result)
+					else:
+						self.assertEqual(resultExp, result, 'testing %s = %s.%s(%s)' % (resultExp, p, func.__name__, arg))
+					print('.', end='')
+				except AssertionError:
+					print('F\n', end='')
+					raise
+				except:
+					print('E\n', end='')
+					raise					
+			print()
+	
+#	def test_special(self):
+#		print('testing special: ', end='')
+#		p = _createPoly('y')
+#		result = p.der('x')
+#		print(result)
+#		self._assertPolyStruct(([],'x'), result)
+#		print()

@@ -58,9 +58,30 @@ TEST_CASES_NULLARY = {
 
 TEST_CASES_UNARY = {
 	Poly.deg: [
+		(-1,	('0', 'x')),
+		(-1,	('0', 'y')),
+		(0,	('1', 'x')),
+		(0,	('1', 'y')),
 		(1,	('x', 'x')),
 		(0,	('x', 'y')),
 		(0,	('y', 'x'))
+	],
+	Poly.coeff: [
+		(0, ('0', 0)),
+		(0, ('0', 1)),
+		(1, ('1', 0)),
+		(0, ('1', 1)),
+		(0, ('x', 0)),
+		(1, ('x', 1)),
+		(0, ('x', 2)),
+		(0, ('0', 0, 'x')),
+		(0, ('0', 0, 'y')),
+		(0, ('0', 0, 't')),
+		(1, ('x', 1, 'x')),
+		(0, ('x', 1, 'y')),
+		(0, ('y', 1, 'x')),
+		(([0,1], 'y'), ('xy', 1, 'x')),
+		(([0,1], 'x'), ('xy', 1, 'y')),
 	],
 	Poly.eval: [
 		(0,	('x', 0)),
@@ -72,7 +93,7 @@ TEST_CASES_UNARY = {
 		([2,1],	('x+y', 2)),
 	],
 	Poly.comp: [
-		(([], 'x'),	('x+y', {'x':0, 'y':0})),
+		(([], 'y'),	('x+y', {'x':0, 'y':0})),
 		(([5], 'y'),	('x+y', {'x':2, 'y':3})),
 		(([0,3], 'x'),	('x+y', {'y': Poly.fromString('2x')})), # 3x = (x+y)|(y=2x)
 	],
@@ -95,7 +116,9 @@ TEST_CASES_UNARY = {
 TEST_CASES_BINARY = {
 	Poly.iadd: [
 		([1,0,1],	('x-1', 'x^2-x+2')), # x^2+1 = (x-1) + (x^2-x+2)
+		(([0,1], 't'),	('0', 't')),
 		(([([0,1], 'x'), 1],'y'),	('x', 'y')),
+		(([([0,1], 'x'), 1],'y'),	('y', 'x')),
 	],
 	Poly.isub: [
 		([-3,2,-1],	('x-1', 'x^2-x+2')), # -x^2+2x-3 = (x-1) - (x^2-x+2)
@@ -136,8 +159,8 @@ class PolynomialTests(unittest.TestCase):
 		coeffsExp,varNameExp = polyStruct
 		self.assertEqual(varNameExp, p.varName,
 			'testing variable in %s ~ %s%s' % (polyStruct, p, whileMsg))
-		self.assertEqual(len(coeffsExp), len(p.coeffs) if p.coeffs != [0] else 0,
-			'testing coeff count in %s ~ %s%s' % (polyStruct, p, whileMsg))
+		self.assertEqual(len(coeffsExp), len(p.coeffs),
+			'testing coeff count in %s ~ %s%s (%s)' % (polyStruct, p, whileMsg, p.coeffs))
 		for idx,(cExp,cPoly) in enumerate(zip(coeffsExp, p.coeffs)):
 			if isinstance(cExp, tuple) and isinstance(cPoly, Poly):
 				self._assertPolyStruct(cExp, cPoly, [idx]+depthPath, rootStruct, rootPoly)
@@ -188,17 +211,17 @@ class PolynomialTests(unittest.TestCase):
 	def test_unaryMethods(self):
 		for func,inOutData in TEST_CASES_UNARY.items():
 			print('testing Polynomial.%s (unary): ' % func.__name__, end='')
-			for resultExp,(polyRepr,arg) in inOutData:
+			for resultExp,(polyRepr,*args) in inOutData:
 				try:
 					p = _createPoly(polyRepr)
-					f_p = func(p, arg)
+					f_p = func(p, *args)
 					# if there is no return value, method has changed polynomial
 					result = p if f_p is None else f_p
 					if isinstance(result, Poly):
 						if isinstance(resultExp, list): resultExp = (resultExp, 'x')
 						self._assertPolyStruct(resultExp, result)
 					else:
-						self.assertEqual(resultExp, result, 'testing %s = %s.%s(%s)' % (resultExp, p, func.__name__, arg))
+						self.assertEqual(resultExp, result, 'testing %s = %s.%s(%s)' % (resultExp, p, func.__name__, args))
 					print('.', end='')
 				except AssertionError:
 					print('F\n', end='')

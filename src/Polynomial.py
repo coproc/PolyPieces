@@ -21,7 +21,7 @@ class Polynomial:
 		   If no input is given the 0 polynomial is assumed.
 		   >>> p_0 = Polynomial()
 		   >>> p_0.coeffs
-		   [0]
+		   []
 		   >>> p_1 = Polynomial(1)
 		   >>> p_1.coeffs
 		   [1]
@@ -35,12 +35,17 @@ class Polynomial:
 		   >>> p_1.coeffs
 		   [1]
 		'''
+		if not isinstance(varName, str):
+			raise TypeError('variable name must be string, type %s received' % type(varName))
+		varName = varName.strip()
+		if not varName or not varName[0].isalpha():
+			raise ValueError("variable name must start with a letter, '%s' given" % varName)
 		self.varName = varName
 		if isinstance(repr, Polynomial):
 			self.coeffs = copy.deepcopy(repr.coeffs)
 			self.varName = repr.varName
 		elif isinstance(repr, numbers.Number):
-			self.coeffs = [repr]
+			self.coeffs = [repr] if repr != 0 else []
 		else:
 			try:
 				iter(repr)
@@ -95,9 +100,26 @@ class Polynomial:
 		   2
 		'''
 		if varName is None or varName == self.varName:
-			return -1 if self.coeffs == [0] else len(self.coeffs) - 1
-		if varName < self.varName: return 0 # optimization
-		return max([c.deg(varName) for c in self.coeffs if isinstance(c, Polynomial)], default=0)
+			return len(self.coeffs) - 1
+		#if varName > self.varName: return min(len(self.coeffs),1) - 1 # optimization
+		return max([c.deg(varName) if isinstance(c, Polynomial) else -1 if c == 0 else 0 for c in self.coeffs], default=-1)
+
+
+	def coeff(self, pow, varName=None):
+		'''coefficient of monomial x^pow (or varName^pow if a varName is given)
+		
+		   >>> Polynomial([1, 2]).coeff(0)
+		   1
+		   >>> Polynomial([1, 2]).coeff(1)
+		   2
+		   >>> Polynomial([1, 2]).coeff(2)
+		   0
+		'''
+		if varName is None or varName == self.varName:
+			return 0 if len(self.coeffs) <= pow else self.coeffs[pow]
+		if varName > self.varName: return 0
+		c = Polynomial([c.coeff(pow, varName) if isinstance(c, Polynomial) else 0 for c in self.coeffs], varName=self.varName)
+		return 0 if c == 0 else c # in case of coefficient: return number instead of constant polynomial
 
 
 	def eval(self, x0):
@@ -119,14 +141,14 @@ class Polynomial:
 
 	# removing leading zero coefficents
 	def _normalize(self):
-		while len(self.coeffs) > 1 and self.coeffs[-1] == 0:
+		while len(self.coeffs) > 0 and self.coeffs[-1] == 0:
 			self.coeffs = self.coeffs[:-1]
 		for idx,c in enumerate(self.coeffs):
 			if isinstance(c, Polynomial):
 				c._normalize()
-				if c.deg() == 0:
+				if c.deg() <= 0:
 					assert len(c.coeffs) <= 1
-					self.coeffs[idx] = 0 if len(c.coeffs) == 0 else c.coeffs[0]
+					self.coeffs[idx] = c.coeff(0)
 		if len(self.coeffs) == 1 and isinstance(self.coeffs[0], Polynomial):
 			self.varName = self.coeffs[0].varName
 			self.coeffs = self.coeffs[0].coeffs
@@ -161,21 +183,19 @@ class Polynomial:
 		   [-1, 1]
 		'''
 		if isinstance(poly, numbers.Number):
-			self.coeffs[0] += poly
+			self._iaddCoeffs([poly])
 		elif isinstance(poly, list):
 			self._iaddCoeffs(poly)
 		elif isinstance(poly, Polynomial):
 			if self.varName == poly.varName:
 				self._iaddCoeffs(poly.coeffs)
 			elif self.varName > poly.varName:
-				self.coeffs[0] += poly
-				self._normalize()
+				self._iaddCoeffs([poly])
 			else:
 				tmp = Polynomial(self)
 				self.coeffs = copy.deepcopy(poly.coeffs)
 				self.varName = poly.varName
-				self.coeffs[0] += tmp			
-				self._normalize()
+				self._iaddCoeffs([tmp])
 		else:
 			raise ValueError("unexpected argument type " + type(poly))
 
@@ -196,22 +216,20 @@ class Polynomial:
 		   [-2, 1]
 		'''
 		if isinstance(poly, numbers.Number):
-			self.coeffs[0] -= poly
+			self._iaddCoeffs([-poly])
 		elif isinstance(poly, list):
 			self._isubCoeffs(poly)
 		elif isinstance(poly, Polynomial):
 			if self.varName == poly.varName:
 				self._isubCoeffs(poly.coeffs)
 			elif self.varName > poly.varName:
-				self.coeffs[0] -= poly
-				self._normalize()
+				self._iaddCoeffs([-poly])
 			else:
 				tmp = Polynomial(self)
 				self.coeffs = copy.deepcopy(poly.coeffs)
 				self.varName = poly.varName
 				self.scale(-1)
-				self.coeffs[0] += tmp				
-				self._normalize()
+				self._iaddCoeffs([tmp])
 		else:
 			raise ValueError("unexpected argument type " + type(poly))
 
@@ -321,7 +339,7 @@ class Polynomial:
 		   [4, 2]
 		   >>> p3 = p1.scaled(0)
 		   >>> p3.coeffs
-		   [0]
+		   []
 		'''
 		if s == 0:
 			return Polynomial(0, varName=self.varName)
@@ -375,7 +393,7 @@ class Polynomial:
 		   [0, 1, 1]
 		   >>> p0 = p1 * Polynomial(0)
 		   >>> p0.coeffs
-		   [0]
+		   []
 		'''
 		if isinstance(poly, numbers.Number):
 			return self.scaled(poly)
@@ -438,9 +456,10 @@ class Polynomial:
 		if isinstance(div, numbers.Number):
 			return self/div
 		assert isinstance(div, Polynomial), "internal error: unexpected div type %s" % type(div)
-		if div.deg() == 0:
-			assert isinstance(div.coeffs[0], numbers.Number), "internal error: unexpected div poly '%s' of var '%s'" % (div.coeffs[0], div.varName)
-			return self/div.coeffs[0]
+		if div.deg() <= 0:
+			div_c0 = div.coeff(0)
+			assert isinstance(div_c0, numbers.Number), "internal error: unexpected div poly '%s' of var '%s'" % (div_c0, div.varName)
+			return self/div_c0
 		if div.varName > self.varName:
 			raise ValueError("cannot divide '%s' by '%s'" % (self, div))
 		deg1 = self.deg()
@@ -530,6 +549,7 @@ class Polynomial:
 			coeffsComp = [c.comp(poly) if isinstance(c, Polynomial) else c for c in self.coeffs]
 			return Polynomial(coeffsComp, varName=self.varName)
 		varName = poly.varName if isinstance(poly, Polynomial) else self.varName
+		if len(self.coeffs) == 0: return Polynomial(varName=varName)
 		poly_var = Polynomial(poly[self.varName], varName=varName) if isinstance(poly, dict) else Polynomial(poly, varName=varName)
 		poly_k = Polynomial(poly_var)
 		def _subs(expr, s):
@@ -617,7 +637,7 @@ class Polynomial:
 		   [0, 1, Fraction(1, 2)]
 		'''
 		if varName is None or varName == self.varName:
-			c0 = self.coeffs[0]
+			c0 = self.coeff(0)
 			# make new coefficient (0) the same type as existing ones
 			# save division by 1
 			coeffsInt = [c0-c0, c0] + [self.coeffs[i]*Fraction(1,i+1) for i in range(1, len(self.coeffs))]
@@ -780,7 +800,8 @@ class Polynomial:
 		False
 		'''
 		if isinstance(poly, numbers.Number):
-			return Polynomial._eqCoeffs(self.coeffs, [poly], eps)
+			if len(self.coeffs) > 1: return False
+			return self.coeff(0) == poly
 		if isinstance(poly, list):
 			coeffs = poly
 		elif isinstance(poly, Polynomial):
@@ -794,14 +815,14 @@ class Polynomial:
 
 # create identity polynomials for given variable name (e.g. polynomial x for variable name 'x')
 def symbol(varName='x'):
-	'''generate simplest polynomials given a variable name
+	'''generate identity polynomials given a variable name
 	
 	>>> symbol()
 	<Polynomial 'x'>
 	>>> symbol('y')
 	<Polynomial 'y'>
 	'''
-	return Polynomial([0,1], varName=varName.strip())
+	return Polynomial([0,1], varName=varName)
 
 def symbols(varNames):
 	'''generate several symbols in one call

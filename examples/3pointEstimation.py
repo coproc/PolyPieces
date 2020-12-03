@@ -61,5 +61,5 @@ xStep = (xRange[1]-xRange[0])/xRes
 densSumMax = max((densityOfSum(xRange[0]+i*xStep),xRange[0]+i*xStep) for i in range(0,xRes+1))
 normalMax = normalApproxDensity(expValTotal)
 absDiffMax = max(abs(diffFunc(xRange[0]+i*xStep)) for i in range(0,xRes+1))
-print('density of sum max: %.3f (x=%.2f), normal max. %.3f (x=%.2f)' % (*densSumMax, normalMax, expValTotal))
+print('\ndensity of sum max: %.3f (x=%.2f), normal max. %.3f (x=%.2f)' % (*densSumMax, normalMax, expValTotal))
 print('max abs diff: %.3f (%.2f%%)' % (absDiffMax, 100.*absDiffMax/densSumMax[0]))

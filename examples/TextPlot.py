@@ -1,3 +1,4 @@
+import math
 import os
 import sys
 import unicodedata
@@ -25,15 +26,17 @@ def adjustConsoleEncodingForUnicode():
 #                                         on linux systems those characters are handled correctly, so a space must be
 #                                         inserted before to avoid combining with the previous dot
 #                                         default: None (choose value dependent on operating system)
-# @return string with (yRes+1) lines, each (xRes+1) characters long
-def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True, insertSpacesBeforeCombiningChars=None):
+# @return string with (yRes+1) lines, each (xRes+1) characters long (for plot area) + 
+#         optional additional line for x-axis values.
+def plot(f, xRange, yRange=None, xRes=79, yRes=23, unicodeOutput=True, insertSpacesBeforeCombiningChars=None,
+		showXAxisValues=True):
 	if insertSpacesBeforeCombiningChars is None:
 		insertSpacesBeforeCombiningChars = os.name != 'nt'
-	dx = (xRange[1]-xRange[0])/xRes
+	dx = (xRange[1]-xRange[0])/float(xRes)
 	xVals = [xRange[0]+i*dx for i in range(xRes+1)]
 	yVals = [f(x) for x in xVals]
 	yMin,yMax = (min(yVals),max(yVals)) if yRange is None else yRange
-	dy = (yMax-yMin)/(yRes-1)
+	dy = (yMax-yMin)/float(yRes)
 	plotArea = [len(xVals)*' ' for _ in range(yRes+1)]
 	for xIdx,y in enumerate(yVals):
 		yScaled = (yMax-y)/dy+0.4
@@ -46,6 +49,13 @@ def plot(f, xRange, yRange=None, xRes=80, yRes=20, unicodeOutput=True, insertSpa
 		for c in PLOT_DOTS:
 			if unicodedata.category(c) == 'Mn':
 				plotString = plotString.replace(c, '\u2000'+c) # insert 'en quad' space to make dot centered horizontally
+	if showXAxisValues:
+		xMin,xMax = min(xVals),max(xVals)
+		xDecPlaces = int(math.floor(3-math.log10(xMax-xMin)))
+		xFmt = '%%.%df' % xDecPlaces
+		xMin_str,xMax_str = xFmt % xMin, xFmt % xMax
+		xAxisRange_str = '[%s%s%s]' % (xMin_str, ' '*(len(xVals)-2-len(xMin_str)-len(xMax_str)), xMax_str)
+		plotString += '\n' + xAxisRange_str
 	return plotString
 
 

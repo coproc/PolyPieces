@@ -544,6 +544,7 @@ class Polynomial:
 		polyComp._normalize()
 		return polyComp
 
+
 	def __call__(self, poly):
 		'''overload call operator (composition/substitution/evaluation)
 		

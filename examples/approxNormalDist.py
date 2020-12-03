@@ -2,11 +2,14 @@
    by convoluting the density of a uniform random variable with itself several times.
    We do exact computations by using coefficients of type fractions.Fraction.
 '''
-import sys
-sys.path.append('../src')
-
-import math
 from fractions import Fraction
+import math
+import os
+import sys
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(THIS_DIR, os.pardir, 'src'))
+
 from Polynomial import symbol
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot

@@ -30,30 +30,10 @@ class PolyPiece:
 			raise TypeError("cannot create PolyPiece, this is not an interval of reals: '%s'" % interval)
 
 
-	def conv(self, pp):
-		'''compute convolution
-		   >>> pp0 = PolyPiece(1, [0,1])
-		   >>> print(pp0.conv(pp0))
-		   f(x) =
-		     x,      x in [0,1]
-		     -x + 2, x in [1,2]
-		     0, else
-		   >>> p_x = Polynomial([0, 1])
-		   >>> pp1 = PolyPiece(p_x, [0,1])
-		   >>> print(pp1.conv(pp1))
-		   f(x) =
-		     1/6x^3,            x in [0,1]
-		     -1/6x^3 + x - 2/3, x in [1,2]
-		     0, else
-		'''
-		if self.poly.deg() < pp.poly.deg():
-			return pp.conv(self)
-
-		xName = self.poly.varName
-		def xPoly(coeffs): return Polynomial(coeffs, xName)
-		xIdPoly = xPoly([0,1])
-		a1, b1 = self.interval
-		a2, b2 = pp.interval
+	@staticmethod
+	def _convLimits(intv1, intv2, xPoly):
+		a1, b1 = intv1
+		a2, b2 = intv2
 		#    a1  b1
 		#     ---- 
 		#	 ------
@@ -83,26 +63,61 @@ class PolyPiece:
 			xLimits.extend([b1+a2,a1+b2])
 		else:
 			xLimits.append(a1+b2)
-		tIntervals.append([xPoly([-b2,1]), b1])
 		xLimits.append(b1+b2)
+		tIntervals.append([xPoly([-b2,1]), b1])
+		return xLimits, tIntervals
 
-		# integration of a polynomial with two variables is reduced to computations with univariate polynomial
+
+	@staticmethod
+	def _convPolys(tIntervals, f, g, xIdPoly):
+		assert f.deg() >= g.deg()
+		if g == 0: return []
+		# integration of a polynomial product with two variables
+		# is reduced to computations with univariate polynomial
 		# by using the multiplication rule until the second polynomial reduces to zero:
 		# (f*g)(x) = int f(t)*g(x-t) dt = F(t)*g(x-t)_a1_x-a2 + int F(t)*g'(x-t) 
 		#          = F(t)*g(x-t) + F2(t)*g'(x-t) + int F2(t)*g''(x-t) | a1 .. x-a2 =
 		#          = F(x-a2)*g(a2) + ... - (F(a1)*g(x-a1) + ...)
-		p2_dk = pp.poly
-		if p2_dk == 0: return PolyPieceFunc()
-		p1int_k = self.poly.int()
-		ppl_conv = [PolyPiece(0, xLimits[i:i+2]) for i in range(len(tIntervals))]
+		F_k = f.int()
+		g_dk = g
+		convPolys = [0 for i in range(len(tIntervals))]
 		while True:
 			for j,tLimits in enumerate(tIntervals):
 				for s,t in zip((-1,1), tLimits):
-					pt = s * p1int_k.comp(t) * p2_dk.comp(xIdPoly - t)
-					ppl_conv[j].poly += pt
-			p2_dk = p2_dk.der()
-			if p2_dk == 0: break
-			p1int_k = p1int_k.int()
+					pt = s * F_k.comp(t) * g_dk.comp(xIdPoly - t)
+					convPolys[j] += pt
+			g_dk = g_dk.der()
+			if g_dk == 0: break
+			F_k = F_k.int()
+		return convPolys
+
+	
+	def conv(self, pp):
+		'''compute convolution
+		   >>> pp0 = PolyPiece(1, [0,1])
+		   >>> print(pp0.conv(pp0))
+		   f(x) =
+		     x,      x in [0,1]
+		     -x + 2, x in [1,2]
+		     0, else
+		   >>> p_x = Polynomial([0, 1])
+		   >>> pp1 = PolyPiece(p_x, [0,1])
+		   >>> print(pp1.conv(pp1))
+		   f(x) =
+		     1/6x^3,            x in [0,1]
+		     -1/6x^3 + x - 2/3, x in [1,2]
+		     0, else
+		'''
+		if self.poly.deg() < pp.poly.deg():
+			return pp.conv(self)
+
+		xName = self.poly.varName
+		def xPoly(coeffs): return Polynomial(coeffs, xName)
+		xLimits,tIntervals = PolyPiece._convLimits(self.interval, pp.interval, xPoly)
+
+		xIdPoly = xPoly([0,1])
+		convPolys = PolyPiece._convPolys(tIntervals, self.poly, pp.poly, xIdPoly)
+		ppl_conv = [PolyPiece(p, xLimits[i:i+2]) for i,p in enumerate(convPolys)]
 		return PolyPieceFunc(ppl_conv)
 
 

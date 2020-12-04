@@ -92,8 +92,7 @@ class PolyPiece:
 		ppl_conv = [PolyPiece(Polynomial(), xLimits[i:i+2]) for i in range(len(tIntervals))]
 		while True:
 			for j,tLimits in enumerate(tIntervals):
-				for i,t in enumerate(tLimits):
-					s = 1 if i%2 else -1
+				for s,t in zip((-1,1), tLimits):
 					if isinstance(t, list):
 						pt = (s*p2_dk.eval(-t[0])) * p1int_k.comp(t)
 					else:

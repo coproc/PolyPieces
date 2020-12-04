@@ -94,7 +94,7 @@ class PolyPiece:
 			for j,tLimits in enumerate(tIntervals):
 				for i,t in enumerate(tLimits):
 					s = 1 if i%2 else -1
-					if type(t) == list:
+					if isinstance(t, list):
 						pt = (s*p2_dk.eval(-t[0])) * p1int_k.comp(t)
 					else:
 						pt = (s*p1int_k.eval(t))   * p2_dk.comp([-t,1])

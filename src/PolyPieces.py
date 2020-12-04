@@ -49,6 +49,9 @@ class PolyPiece:
 		if self.poly.deg() < pp.poly.deg():
 			return pp.conv(self)
 
+		xName = self.poly.varName
+		def xPoly(coeffs): return Polynomial(coeffs, xName)
+		xIdPoly = xPoly([0,1])
 		a1, b1 = self.interval
 		a2, b2 = pp.interval
 		#    a1  b1
@@ -71,32 +74,31 @@ class PolyPiece:
 		#	a1+b2 < x < b1+a2: x-b2 < t < x-a2
 		#	b1+a2 < x < b1+b2: x-b2 < t < b1
 		xLimits = [a1+a2]
-		tIntervals = [[a1,[-a2,1]]]
+		tIntervals = [[a1, xPoly([-a2,1])]]
 		if a1+b2 < b1+a2:
-			tIntervals.append([[-b2,1],[-a2,1]])
+			tIntervals.append([xPoly([-b2,1]), xPoly([-a2,1])])
 			xLimits.extend([a1+b2,b1+a2])
 		elif a1+b2 > b1+a2:
 			tIntervals.append([a1,b1])
 			xLimits.extend([b1+a2,a1+b2])
 		else:
 			xLimits.append(a1+b2)
-		tIntervals.append([[-b2,1], b1])
+		tIntervals.append([xPoly([-b2,1]), b1])
 		xLimits.append(b1+b2)
 
+		# integration of a polynomial with two variables is reduced to computations with univariate polynomial
+		# by using the multiplication rule until the second polynomial reduces to zero:
 		# (f*g)(x) = int f(t)*g(x-t) dt = F(t)*g(x-t)_a1_x-a2 + int F(t)*g'(x-t) 
 		#          = F(t)*g(x-t) + F2(t)*g'(x-t) + int F2(t)*g''(x-t) | a1 .. x-a2 =
 		#          = F(x-a2)*g(a2) + ... - (F(a1)*g(x-a1) + ...)
 		p2_dk = pp.poly
 		if p2_dk == 0: return PolyPieceFunc()
 		p1int_k = self.poly.int()
-		ppl_conv = [PolyPiece(Polynomial(), xLimits[i:i+2]) for i in range(len(tIntervals))]
+		ppl_conv = [PolyPiece(0, xLimits[i:i+2]) for i in range(len(tIntervals))]
 		while True:
 			for j,tLimits in enumerate(tIntervals):
 				for s,t in zip((-1,1), tLimits):
-					if isinstance(t, list):
-						pt = (s*p2_dk.eval(-t[0])) * p1int_k.comp(t)
-					else:
-						pt = (s*p1int_k.eval(t))   * p2_dk.comp([-t,1])
+					pt = s * p1int_k.comp(t) * p2_dk.comp(xIdPoly - t)
 					ppl_conv[j].poly += pt
 			p2_dk = p2_dk.der()
 			if p2_dk == 0: break

@@ -34,6 +34,12 @@ TEST_CASES_NULLARY = {
 		# multivariate polys: remove (layers with) variables with only constant terms
 		(([([0,1], 'x'), 1], 'z'), '(x+y+z) - y') # = x + z
 	],
+	Poly.allVarNames: [
+		({'x'}, 	[]),
+		({'x', 'y'}, 	'xy'),
+		({'y'}, 	'(x+y)-x'),
+		({'t', 'x', 'y', 'z'}, 	'z*x + yz^2+t'),
+	],
 	Poly.der: [
 		# univariate polys
 		([],	[]),

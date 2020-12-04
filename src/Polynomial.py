@@ -140,6 +140,10 @@ class Polynomial:
 		return 0 if c == 0 else c # in case of coefficient: return number instead of constant polynomial
 
 
+	def allVarNames(self):
+		return {self.varName}.union(*[p.allVarNames() for p in self.coeffs if isinstance(p, Polynomial)])
+
+
 	def eval(self, x0):
 		'''evaluate polynomial at given x0, i.e. compute poly(x0)
 		

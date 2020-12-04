@@ -217,7 +217,7 @@ class PolyPieceFunc:
 		return True
 
 
-	def _isContinuous(self, prec=1e-10, printFailReason=False):
+	def _isContinuous(self, prec=None, printFailReason=False):
 		'''check if piecewise function is continuous.
 		
 		   >>> fpp = PolyPieceFunc()
@@ -231,13 +231,20 @@ class PolyPieceFunc:
 		   True
 		'''
 		assert(self._isConsistent(printFailReason=printFailReason))
+		def _precDef(prec, val):
+			if prec is not None: return prec
+			if isinstance(val, (int, Fraction)): return 0 # exact computation with ints and fractions
+			return 1e-10 # approximate calculations with floats
+
 		if len(self.polyPieces) == 0: return True
 		ppPrev = PolyPiece(Polynomial(), [-float('inf'),self.polyPieces[0].interval[0]])
 		for i,pp in enumerate(self.polyPieces):
 			x0 = pp.interval[0]
-			valPrev = ppPrev.poly.eval(x0) if abs(x0 - ppPrev.interval[1]) < prec else 0
+			absDiffX = abs(x0 - ppPrev.interval[1])
+			valPrev = ppPrev.poly.eval(x0) if absDiffX <= _precDef(prec, absDiffX) else 0
 			val_x0 = pp.poly.eval(x0)
-			if abs(val_x0 - valPrev) >= prec:
+			absDiffY = abs(val_x0 - valPrev)
+			if absDiffY > _precDef(prec, absDiffY):
 				if printFailReason:
 					print("poly %d does not start at previous value %f, but at %f" % (i, valPrev, val_x0), file=sys.stderr)
 				return False

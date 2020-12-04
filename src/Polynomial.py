@@ -29,12 +29,7 @@ class Polynomial:
 		   >>> p_x2.coeffs
 		   [0, 0, 1]
 		'''
-		if not isinstance(varName, str):
-			raise TypeError('variable name must be string, type %s received' % type(varName))
-		varName = varName.strip()
-		if not varName or not varName[0].isalpha():
-			raise ValueError("variable name must start with a letter, '%s' given" % varName)
-		self.varName = varName
+		self.varName = Polynomial._checkVarName(varName)
 		if isinstance(repr, Polynomial):
 			raise TypeError('cannot construct polynomial from polynomial; do you mean to use the method clone()?')
 		elif isinstance(repr, numbers.Number):
@@ -47,7 +42,18 @@ class Polynomial:
 				self._normalize()
 			except TypeError:
 				raise TypeError('unexpected type "%s" when constructing polynomial' % type(repr))
-			
+
+
+	
+	@staticmethod
+	def _checkVarName(varName):
+		if not isinstance(varName, str):
+			raise TypeError('variable name must be string, type %s received' % type(varName))
+		varName = varName.strip()
+		if not varName or not varName[0].isalpha():
+			raise ValueError("variable name must start with a letter, '%s' given" % varName)
+		return varName
+
 
 	def clone(self):
 		'''create deep copy

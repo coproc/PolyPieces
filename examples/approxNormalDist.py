@@ -79,7 +79,8 @@ print()
 expVal_s = expectation(d_deg11_s)
 var_s = variance(d_deg11_s)
 d_deg11_max = d_deg11_s.eval(0)
-print("area=%s, expectation value=%s, variance=%s, f_max=f(0)=%s=%f" % (d_deg11_s.intDef(), expVal_s, var_s, d_deg11_max, d_deg11_max))
+isContinuous_str = '' if d_deg11_s._isContinuous() else 'not '
+print("area=%s, expectation value=%s, variance=%s, %scontinuous, f_max=f(0)=%s=%f" % (d_deg11_s.intDef(), expVal_s, var_s, isContinuous_str, d_deg11_max, d_deg11_max))
 
 ndd_s = normalDistDensity()
 ndd_s_dev = lambda x: d_deg11_s.eval(x) - ndd_s(x)

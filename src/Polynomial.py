@@ -28,12 +28,6 @@ class Polynomial:
 		   >>> p_x2 = Polynomial([0,0,1]) # x^2
 		   >>> p_x2.coeffs
 		   [0, 0, 1]
-		   >>> p = Polynomial(p_1)
-		   >>> p.coeffs.append(1)
-		   >>> p.coeffs
-		   [1, 1]
-		   >>> p_1.coeffs
-		   [1]
 		'''
 		if not isinstance(varName, str):
 			raise TypeError('variable name must be string, type %s received' % type(varName))
@@ -42,20 +36,33 @@ class Polynomial:
 			raise ValueError("variable name must start with a letter, '%s' given" % varName)
 		self.varName = varName
 		if isinstance(repr, Polynomial):
-			self.coeffs = copy.deepcopy(repr.coeffs)
-			self.varName = repr.varName
+			raise TypeError('cannot construct polynomial from polynomial; do you mean to use the method clone()?')
 		elif isinstance(repr, numbers.Number):
 			self.coeffs = [repr] if repr != 0 else []
 		else:
 			try:
 				iter(repr)
-				self.coeffs = list(copy.deepcopy(repr))
-				if len(self.coeffs) == 0: self.coeffs.append(0)
+				coeffs = repr if isinstance(repr, list) else list(repr)
+				self.coeffs = copy.deepcopy(coeffs)
 				self._normalize()
 			except TypeError:
 				raise TypeError('unexpected type "%s" when constructing polynomial' % type(repr))
 			
 
+	def clone(self):
+		'''create deep copy
+		
+		   >>> p0 = Polynomial()
+		   >>> p1 = p0.clone()
+		   >>> p1.coeffs.append(1)
+		   >>> p1.coeffs
+		   [1]
+		   >>> p0.coeffs
+		   []
+		'''
+		return Polynomial(copy.deepcopy(self.coeffs), self.varName)
+
+	
 	@staticmethod
 	def fromString(exprStr, varNames=None):
 		'''create univariate polynomial from expression string
@@ -192,7 +199,7 @@ class Polynomial:
 			elif self.varName > poly.varName:
 				self._iaddCoeffs([poly])
 			else:
-				tmp = Polynomial(self)
+				tmp = self.clone()
 				self.coeffs = copy.deepcopy(poly.coeffs)
 				self.varName = poly.varName
 				self._iaddCoeffs([tmp])
@@ -225,7 +232,7 @@ class Polynomial:
 			elif self.varName > poly.varName:
 				self._iaddCoeffs([-poly])
 			else:
-				tmp = Polynomial(self)
+				tmp = self.clone()
 				self.coeffs = copy.deepcopy(poly.coeffs)
 				self.varName = poly.varName
 				self.scale(-1)
@@ -244,7 +251,7 @@ class Polynomial:
 		   [1]
 		'''
 		try:
-			pSum = Polynomial(self)
+			pSum = self.clone()
 			pSum.iadd(poly)
 			return pSum
 		except ValueError:
@@ -282,9 +289,11 @@ class Polynomial:
 		   >>> p = p1 - p2
 		   >>> p.coeffs
 		   [-1, 1]
+		   >>> p1.coeffs
+		   [0, 1, 1]
 		'''
 		try:
-			pDiff = Polynomial(self.coeffs, varName=self.varName)
+			pDiff = self.clone()
 			pDiff.isub(poly)
 			return pDiff
 		except ValueError:
@@ -303,13 +312,14 @@ class Polynomial:
 		return self
 
 
-	def __rsub__(self, poly):
+	def __rsub__(self, v):
 		'''overload operator - for right hand side
 		   >>> p = Polynomial([0,1])
 		   >>> (1 - p).coeffs
 		   [1, -1]
 		'''
-		p = Polynomial(poly, varName=self.varName)
+		assert not isinstance(v, Polynomial)
+		p = Polynomial(v, varName=self.varName)
 		return p.__sub__(self)
 
 
@@ -343,7 +353,7 @@ class Polynomial:
 		'''
 		if s == 0:
 			return Polynomial(0, varName=self.varName)
-		polyScaled = Polynomial(self)
+		polyScaled = self.clone()
 		polyScaled.scale(s)
 		return polyScaled
 
@@ -485,11 +495,11 @@ class Polynomial:
 		   >>> p /= 2
 		   >>> p.coeffs
 		   [Fraction(-1, 10), Fraction(1, 5)]
-		   >>> q,r = poly('x^3-1') / poly('x-1'); print(f'{q}, {r}')
+		   >>> q,r = poly('x^3-1') / poly('x-1'); print("%s, %s" % (q, r))
 		   x^2 + x + 1, 0
-		   >>> q,r = poly('x^3-1') / poly('x+1'); print(f'{q}, {r}')
+		   >>> q,r = poly('x^3-1') / poly('x+1'); print("%s, %s" % (q, r))
 		   x^2 - x + 1, -2
-		   >>> q,r = poly('xy') / poly('2x'); print(f'{q}, {r}')
+		   >>> q,r = poly('xy') / poly('2x'); print("%s, %s" % (q, r))
 		   1/2y, 0
 		'''
 		if isinstance(d, numbers.Number):
@@ -500,7 +510,7 @@ class Polynomial:
 			return self.scaled(scaleFac)
 		if not isinstance(d, Polynomial):
 			raise TypeError("divisor of invalid type %s" % type(d))
-		quot,rem = 0,Polynomial(self)
+		quot,rem = 0,self.clone()
 		try:
 			while True:
 				q = rem._termQuot(d)
@@ -523,7 +533,7 @@ class Polynomial:
 		   [-1, 3, -3, 1]
 		'''
 		res = Polynomial(1, varName=self.varName)
-		p_2 = Polynomial(self, varName=self.varName)
+		p_2 = self.clone()
 		while (e>0):
 			if e % 2: res *= p_2
 			e >>= 1
@@ -550,14 +560,14 @@ class Polynomial:
 			return Polynomial(coeffsComp, varName=self.varName)
 		varName = poly.varName if isinstance(poly, Polynomial) else self.varName
 		if len(self.coeffs) == 0: return Polynomial(varName=varName)
-		poly_var = Polynomial(poly[self.varName], varName=varName) if isinstance(poly, dict) else Polynomial(poly, varName=varName)
-		poly_k = Polynomial(poly_var)
+		var = poly[self.varName] if isinstance(poly, dict) else Polynomial(poly, varName) if isinstance(poly, list) else poly
+		poly_k = var.clone() if isinstance(var, Polynomial) else Polynomial([var], varName)
 		def _subs(expr, s):
 			return expr.comp(s) if isinstance(expr, Polynomial) and isinstance(s, dict) else expr
 		c_0 = _subs(self.coeffs[0], poly)
-		polyComp = Polynomial([c_0], varName=poly_var.varName)
+		polyComp = Polynomial([c_0], varName=varName)
 		for k in range(1, len(self.coeffs)):
-			if k > 1: poly_k *= poly_var
+			if k > 1: poly_k *= var
 			c_k = _subs(self.coeffs[k], poly)
 			polyComp += c_k * poly_k
 

@@ -26,7 +26,7 @@ from random import randint
 triangleDists = []
 expValTotal = 0
 varianceTotal = 0
-for i in range(6):
+for i in range(4):
 	a = randint(1,10)
 	c = a + randint(1,3)
 	b = c + randint(1,7)
@@ -41,6 +41,7 @@ for td in triangleDists:
 
 from functools import reduce
 densityOfSum = reduce(lambda x,y: x^y, triangleDists)
+assert(densityOfSum._isContinuous())
 
 print('\ndensity of sum of random variables with triangular distribution')
 print(densityOfSum)

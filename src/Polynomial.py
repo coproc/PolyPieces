@@ -38,6 +38,11 @@ class Polynomial:
 			try:
 				iter(repr)
 				coeffs = repr if isinstance(repr, list) else list(repr)
+				coeffsVarMax = max([p.varName for p in coeffs if isinstance(p, Polynomial)], default='')
+				if coeffsVarMax >= varName:
+					raise ValueError("coefficients of polynomial must have lexicographically "
+					" smaller variable names than the main variable (here '%s'), but '%s' found" %
+					(varName, coeffsVarMax))
 				self.coeffs = copy.deepcopy(coeffs)
 				self._normalize()
 			except TypeError:

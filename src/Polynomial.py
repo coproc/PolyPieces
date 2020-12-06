@@ -152,6 +152,11 @@ class Polynomial:
 		   1
 		   >>> p.eval(1)
 		   4
+		   >>> p1 = Polynomial([0,0,1]) # x**2
+		   >>> p2 = Polynomial([-1,1])  # x-1
+		   >>> p3 = p1.eval(p2)         # (x-1)**2
+		   >>> p3.coeffs
+		   [1, -2, 1]
 		'''
 		p_x0 = 0
 		for c in reversed(self.coeffs):
@@ -160,7 +165,7 @@ class Polynomial:
 		# if x0 is not a polynomial (e.g. a number), try not to return a polynomial
 		# (the constant term it the result is a constant polynomial)
 		if isinstance(x0, Polynomial):
-			return p_x0 if isinstance(p_x0, Polynomial) else Polynomial(x0)
+			return p_x0 if isinstance(p_x0, Polynomial) else Polynomial(p_x0)
 		return p_x0 if not isinstance(p_x0, Polynomial) or p_x0.deg() >= 1 else p_x0.coeff(0)
 
 
@@ -557,44 +562,22 @@ class Polynomial:
 			e >>= 1
 			p_2 *= p_2
 		return res
-		
 
-	def comp(self, poly):
-		'''compute polynomial composition self o poly
-		
-		   >>> p1 = Polynomial([0,0,1]) # x**2
-		   >>> p2 = Polynomial([-1,1])  # x-1
-		   >>> p = p1.comp(p2)          # (x-1)**2
-		   >>> p.coeffs
-		   [1, -2, 1]
-		   >>> p3 = Polynomial([0,0,0,1]) # x**3
-		   >>> p3.comp(p2).coeffs         # (x-1)**3
-		   [-1, 3, -3, 1]
+
+	def subs(self, substitutions):
+		'''compute polynomial with given substitutions
 		'''
-		if isinstance(poly, numbers.Number):
-			return self.eval(poly)
-		if isinstance(poly, dict) and not self.varName in poly:
-			coeffsComp = [c.comp(poly) if isinstance(c, Polynomial) else c for c in self.coeffs]
-			return Polynomial(coeffsComp, varName=self.varName)
-		varName = poly.varName if isinstance(poly, Polynomial) else self.varName
-		if len(self.coeffs) == 0: return Polynomial(varName=varName)
-		var = poly[self.varName] if isinstance(poly, dict) else Polynomial(poly, varName) if isinstance(poly, list) else poly
-		poly_k = var.clone() if isinstance(var, Polynomial) else Polynomial([var], varName)
+		varSubs = substitutions[self.varName] if self.varName in substitutions else Polynomial([0,1], varName=self.varName)
 		def _subs(expr, s):
-			return expr.comp(s) if isinstance(expr, Polynomial) and isinstance(s, dict) else expr
-		c_0 = _subs(self.coeffs[0], poly)
-		polyComp = Polynomial([c_0], varName=varName)
-		for k in range(1, len(self.coeffs)):
-			if k > 1: poly_k *= var
-			c_k = _subs(self.coeffs[k], poly)
-			polyComp += c_k * poly_k
-
-		polyComp._normalize()
-		return polyComp
+			return expr.subs(s) if isinstance(expr, Polynomial) else expr
+		polySubs = 0
+		for c in reversed(self.coeffs):
+			polySubs = varSubs*polySubs + _subs(c, substitutions)
+		return polySubs
 
 
-	def __call__(self, poly):
-		'''overload call operator (composition/substitution/evaluation)
+	def __call__(self, x0):
+		'''overload call operator (evaluation/composition)
 		
 		   >>> p1 = Polynomial.fromString('x**2+x-1')
 		   >>> p1(0)
@@ -605,7 +588,7 @@ class Polynomial:
 		   >>> p1(p2)(p2).coeffs
 		   [-1, 1, 1]
 		'''
-		return self.comp(poly)
+		return self.eval(x0)
 
 
 	def der(self, varName=None):
@@ -654,7 +637,7 @@ class Polynomial:
 		'''
 		pIntIndef = self.intIndef(varName)
 		lower,upper = interval if varName is None else [{varName: val} for val in interval]
-		return pIntIndef.comp(upper) - pIntIndef.comp(lower)
+		return pIntIndef(upper) - pIntIndef(lower)
 
 
 	def intIndef(self, varName=None):

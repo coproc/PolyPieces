@@ -99,10 +99,11 @@ TEST_CASES_UNARY = {
 		([0,1],	('x+y', 0)),
 		([2,1],	('x+y', 2)),
 	],
-	Poly.comp: [
-		(([], 'y'),	('x+y', {'x':0, 'y':0})),
-		(([5], 'y'),	('x+y', {'x':2, 'y':3})),
+	Poly.subs: [
+		(0,	('x+y', {'x':0, 'y':0})),
+		(5,	('x+y', {'x':2, 'y':3})),
 		(([0,3], 'x'),	('x+y', {'y': Poly.fromString('2x')})), # 3x = (x+y)|(y=2x)
+		(([0,3], 'y'),	('x+y', {'x': Poly.fromString('2y')})), # 3x = (x+y)|(y=2x)
 	],
 	Poly.der: [
 		([1],	('x', 'x')),
@@ -124,12 +125,14 @@ TEST_CASES_UNARY = {
 TEST_CASES_BINARY = {
 	# when substituting a polynomial for the main variable, the result will also be a polynomial
 	Poly.eval: [
-		(([], 'x'),	('x', 0)), # substitute Polynomial(0) for x
-		(([1], 'x'),	('x', 1)),
+		([],	('0', 'x')),
+		([],	('x', '0')),
+		([1],	('x', '1')),
 		(([0,1], 'x'),	('x', 'x')),
-		(([0,1], 't'),	('x', 't')),
-		(([0,1], 'z'),	('x', 'z')),
+		(([0,1], 'x'),	('y', 'x')),
+		(([0,1], 'y'),	('x', 'y')),
 		(([], 't'),	('x-t', 't')), # Polynomial(0) = (x-t)(x=t)
+		([-1, 3, -3, 1],	('x^3', 'x-1')),
 	],
 	Poly.iadd: [
 		([1,0,1],	('x-1', 'x^2-x+2')), # x^2+1 = (x-1) + (x^2-x+2)
@@ -147,13 +150,6 @@ TEST_CASES_BINARY = {
 		([-1,0,1],	('x-1', 'x+1')),
 		(([0, ([0,1], 'x')],'y'),	('x', 'y')),
 	],
-	Poly.comp: [
-		([],	('0', 'x')),
-		([],	('x', '0')),
-		(([0,1], 'x'),	('y', 'x')),
-		(([0,1], 'y'),	('x', 'y')),
-		([-1,3,-3,1],	('x^3', 'x-1')),
-	]
 }
 
 def _createPoly(repr):
@@ -214,7 +210,7 @@ class PolynomialTests(unittest.TestCase):
 						if isinstance(resultExp, list): resultExp = (resultExp, 'x')
 						self._assertPolyStruct(resultExp, result)
 					else:
-						self.assertEqual(resultExp, result, 'testing %s = %s.%s()' % (resultExp, p, func.__name__))
+						self.assertEqual(resultExp, result, 'testing %s = (%s).%s()' % (resultExp, p, func.__name__))
 					print('.', end='')
 				except AssertionError:
 					print('F\n', end='')
@@ -238,7 +234,7 @@ class PolynomialTests(unittest.TestCase):
 						if isinstance(resultExp, list): resultExp = (resultExp, 'x')
 						self._assertPolyStruct(resultExp, result)
 					else:
-						self.assertEqual(resultExp, result, 'testing %s = %s.%s(%s)' % (resultExp, p, func.__name__, args))
+						self.assertEqual(resultExp, result, 'testing %s = (%s).%s(%s)' % (resultExp, p, func.__name__, args))
 					print('.', end='')
 				except AssertionError:
 					print('F\n', end='')
@@ -262,7 +258,7 @@ class PolynomialTests(unittest.TestCase):
 						if isinstance(resultExp, list): resultExp = (resultExp, 'x')
 						self._assertPolyStruct(resultExp, result)
 					else:
-						self.assertEqual(resultExp, result, 'testing %s = %s.%s(%s)' % (resultExp, p, func.__name__, pa))
+						self.assertEqual(resultExp, result, 'testing %s = (%s).%s(%s)' % (resultExp, p, func.__name__, pa))
 					print('.', end='')
 				except AssertionError:
 					print('F\n', end='')

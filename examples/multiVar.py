@@ -27,9 +27,10 @@ print('deg(p2, "x"):', p2.deg("x"),', deg(p2, "y"):', p2.deg("y"))
 # composition
 print('p1(p2):', p1(p2), ', p2(p1):', p2(p1))
 print('p1(0):',  p1(0),  ', p1(1):',  p1(1))
-print('p1({x:1,y:2}):',  p1({'x':1,'y':2}), ', p2({x:y,y:2}):', p2({'x':1,'y':2}))
-print('p1({x:y}):',      p1({'x':y}),       ', p2({x:y}):',     p2({'x':y}))
-print('p1({y:x}):',      p1({'y':x}),       ', p2({y:x}):',     p2({'y':x}))
+# substitution
+print('p1.subs({x:1,y:2}):',  p1.subs({'x':1,'y':2}), ', p2({x:y,y:2}):', p2.subs({'x':1,'y':2}))
+print('p1.subs({x:y}):',      p1.subs({'x':y}),       ', p2({x:y}):',     p2.subs({'x':y}))
+print('p1.subs({y:x}):',      p1.subs({'y':x}),       ', p2({y:x}):',     p2.subs({'y':x}))
 # derivative
 print('der(p1):',      p1.der(),   ', der(p2):',      p2.der())
 print('der(p1, "x"):', p1.der("x"),', der(p1, "y"):', p1.der("y"))
@@ -59,7 +60,7 @@ print('equals 0:', p0 == 0)
 p1m2 = p1*p2
 print('p1*p2: ', end='')
 dbgPoly(p1m2)
-print('(p1*p2)({x:2}):',  p1m2({'x':2}), ', (p1*p2)({y:3}):', p1m2({'y':3}), ', (p1*p2)({x:2,y:3}):', p1m2({'x':2,'y':3}))
+print('(p1*p2).subs({x:2}):',  p1m2.subs({'x':2}), ', (p1*p2).subs({y:3}):', p1m2.subs({'y':3}), ', (p1*p2).subs({x:2,y:3}):', p1m2.subs({'x':2,'y':3}))
 
 print('\np1 and p2 must have remained unchanged:')
 print('p1:', p1,', p2:', p2)

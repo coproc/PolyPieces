@@ -298,7 +298,7 @@ class PolyPieceFunc:
 
 
 	def eval(self, x0):
-		'''evaluate at x=x0
+		'''evaluate at number x0
 		
 		   >>> pp1 = PolyPiece(Polynomial([0,1]), [-1,1])
 		   >>> pp2 = PolyPiece(Polynomial([0,2]), [ 1,2])
@@ -318,6 +318,7 @@ class PolyPieceFunc:
 		   >>> fpp.eval(2.1)
 		   0
 		'''
+		assert isinstance(x0, numbers.Number)
 		poly, _ = self._selectPP(x0)
 		return poly.eval(x0)
 
@@ -350,7 +351,7 @@ class PolyPieceFunc:
 		fppComp = PolyPieceFunc()
 		for pp in self.polyPieces:
 			a,b = pp.interval
-			fppComp.polyPieces.append(PolyPiece(pp.poly.comp(p), [(a-d)*scaleFacIntv,(b-d)*scaleFacIntv]))
+			fppComp.polyPieces.append(PolyPiece(pp.poly(p), [(a-d)*scaleFacIntv,(b-d)*scaleFacIntv]))
 			
 		return fppComp
 
@@ -545,9 +546,9 @@ class PolyPieceFunc:
 		   >>> p_x2 = Polynomial([0,0,1])
 		   >>> p_x_2 = Polynomial([2,1])
 		   >>> p_x__2 = Polynomial([-2,1])
-		   >>> fpp = PolyPieceFunc([PolyPiece(p_x2.comp(p_x_2),  [-2,-1]), 
-		   ...                      PolyPiece(2*p_1 - p_x2,      [-1, 1]), 
-		   ...                      PolyPiece(p_x2.comp(p_x__2), [ 1, 2])]) 
+		   >>> fpp = PolyPieceFunc([PolyPiece(p_x2(p_x_2),	[-2,-1]), 
+		   ...                      PolyPiece(2*p_1 - p_x2,	[-1, 1]), 
+		   ...                      PolyPiece(p_x2(p_x__2),	[ 1, 2])]) 
 		   >>> fppDer = fpp.der()
 		   >>> fppDer._isContinuous()
 		   True

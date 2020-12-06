@@ -6,6 +6,15 @@ from fractions import Fraction
 from Polynomial import Polynomial
 
 
+def _newVarName(usedVarNames, baseName='t'):
+	if not baseName in usedVarNames: return baseName
+	idx = 0
+	varName = '%s%d' % (baseName, idx)
+	while varName in usedVarNames:
+		idx += 1
+	return varName
+
+
 class PolyPiece:
 	'''polynomial over interval'''
 	def __init__(self, poly, interval=None):
@@ -93,6 +102,16 @@ class PolyPiece:
 		return convPolys
 
 
+	@staticmethod
+	def _convPolys(tIntervals, f, g, xIdPoly):
+		zName = max(f.varName, g.varName, xIdPoly.varName) + '0'
+		fz = Polynomial(f.coeffs, varName=zName)
+		x_z = Polynomial([xIdPoly,-1], varName=zName)
+		F = (fz*g(x_z)).intIndef(zName)
+		convPolys = [F(upper) - F(lower) for lower,upper in tIntervals]
+		return convPolys
+
+
 	def conv(self, pp, xName='x'):
 		'''compute convolution
 		   >>> pp0 = PolyPiece(1, [0,1])
@@ -116,7 +135,9 @@ class PolyPiece:
 		xLimits,tIntervals = PolyPiece._convLimits(self.interval, pp.interval, xPoly)
 
 		xIdPoly = xPoly([0,1])
-		convPolys = PolyPiece._convPolys_univariate(tIntervals, self.poly, pp.poly, xIdPoly)
+		try:    convPolys = PolyPiece._convPolys           (tIntervals, self.poly, pp.poly, xIdPoly)
+		except: convPolys = PolyPiece._convPolys_univariate(tIntervals, self.poly, pp.poly, xIdPoly)
+		#convPolys = PolyPiece._convPolys_univariate(tIntervals, self.poly, pp.poly, xIdPoly)
 		ppl_conv = [PolyPiece(p, xLimits[i:i+2]) for i,p in enumerate(convPolys)]
 		return PolyPieceFunc(ppl_conv)
 

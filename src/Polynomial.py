@@ -153,11 +153,9 @@ class Polynomial:
 		   >>> p.eval(1)
 		   4
 		'''
-		x0_k = 1
 		p_x0 = 0
-		for k in range(len(self.coeffs)):
-			p_x0 += self.coeffs[k]*x0_k
-			x0_k *= x0
+		for c in reversed(self.coeffs):
+			p_x0 = x0*p_x0 + c
 		# if x0 is a polynomial, make sure return value is a polynomial
 		# if x0 is not a polynomial (e.g. a number), try not to return a polynomial
 		# (the constant term it the result is a constant polynomial)

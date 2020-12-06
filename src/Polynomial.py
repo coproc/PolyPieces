@@ -158,7 +158,12 @@ class Polynomial:
 		for k in range(len(self.coeffs)):
 			p_x0 += self.coeffs[k]*x0_k
 			x0_k *= x0
-		return p_x0
+		# if x0 is a polynomial, make sure return value is a polynomial
+		# if x0 is not a polynomial (e.g. a number), try not to return a polynomial
+		# (the constant term it the result is a constant polynomial)
+		if isinstance(x0, Polynomial):
+			return p_x0 if isinstance(p_x0, Polynomial) else Polynomial(x0)
+		return p_x0 if not isinstance(p_x0, Polynomial) or p_x0.deg() >= 1 else p_x0.coeff(0)
 
 
 	# removing leading zero coefficents

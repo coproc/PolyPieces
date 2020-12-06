@@ -1,3 +1,4 @@
+import numbers
 import unittest
 
 from src.Polynomial import Polynomial as Poly
@@ -119,7 +120,17 @@ TEST_CASES_UNARY = {
 }
 
 
+# test cases with polynomial and polynomial argument
 TEST_CASES_BINARY = {
+	# when substituting a polynomial for the main variable, the result will also be a polynomial
+	Poly.eval: [
+		(([], 'x'),	('x', 0)), # substitute Polynomial(0) for x
+		(([1], 'x'),	('x', 1)),
+		(([0,1], 'x'),	('x', 'x')),
+		(([0,1], 't'),	('x', 't')),
+		(([0,1], 'z'),	('x', 'z')),
+		(([], 't'),	('x-t', 't')), # Polynomial(0) = (x-t)(x=t)
+	],
 	Poly.iadd: [
 		([1,0,1],	('x-1', 'x^2-x+2')), # x^2+1 = (x-1) + (x^2-x+2)
 		(([0,1], 't'),	('0', 't')),
@@ -149,7 +160,7 @@ def _createPoly(repr):
 	if isinstance(repr, Poly): return repr
 	if isinstance(repr, str): return Poly.fromString(repr)
 	if isinstance(repr, tuple): return Poly(*repr) if isinstance(repr[0], list) else Poly.fromString(*repr)
-	if isinstance(repr, list): return Poly(repr)
+	if isinstance(repr, list) or isinstance(repr, numbers.Number): return Poly(repr)
 	raise TypeError('cannot create polynomial from type %s (%s)' % (type(repr), repr))
 
 

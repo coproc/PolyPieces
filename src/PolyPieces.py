@@ -69,30 +69,31 @@ class PolyPiece:
 
 
 	@staticmethod
-	def _convPolys(tIntervals, f, g, xIdPoly):
+	def _convPolys_univariate(tIntervals, f, g, xIdPoly):
+		"""compute convolution pieces, when the datatype of f and g does not support multivariate
+		expressions (e.g. only univariate polynomials)
+		"""
 		assert f.deg() >= g.deg()
-		if g == 0: return []
 		# integration of a polynomial product with two variables
 		# is reduced to computations with univariate polynomial
 		# by using the multiplication rule until the second polynomial reduces to zero:
 		# (f*g)(x) = int f(t)*g(x-t) dt = F(t)*g(x-t)_a1_x-a2 + int F(t)*g'(x-t) 
 		#          = F(t)*g(x-t) + F2(t)*g'(x-t) + int F2(t)*g''(x-t) | a1 .. x-a2 =
 		#          = F(x-a2)*g(a2) + ... - (F(a1)*g(x-a1) + ...)
-		F_k = f.int()
+		F_k = f
 		g_dk = g
 		convPolys = [0 for i in range(len(tIntervals))]
-		while True:
+		while g_dk != 0:
+			F_k = F_k.int()
 			for j,tLimits in enumerate(tIntervals):
 				for s,t in zip((-1,1), tLimits):
-					pt = s * F_k.comp(t) * g_dk.comp(xIdPoly - t)
+					pt = s * F_k(t) * g_dk(xIdPoly - t)
 					convPolys[j] += pt
 			g_dk = g_dk.der()
-			if g_dk == 0: break
-			F_k = F_k.int()
 		return convPolys
 
-	
-	def conv(self, pp):
+
+	def conv(self, pp, xName='x'):
 		'''compute convolution
 		   >>> pp0 = PolyPiece(1, [0,1])
 		   >>> print(pp0.conv(pp0))
@@ -111,12 +112,11 @@ class PolyPiece:
 		if self.poly.deg() < pp.poly.deg():
 			return pp.conv(self)
 
-		xName = self.poly.varName
 		def xPoly(coeffs): return Polynomial(coeffs, xName)
 		xLimits,tIntervals = PolyPiece._convLimits(self.interval, pp.interval, xPoly)
 
 		xIdPoly = xPoly([0,1])
-		convPolys = PolyPiece._convPolys(tIntervals, self.poly, pp.poly, xIdPoly)
+		convPolys = PolyPiece._convPolys_univariate(tIntervals, self.poly, pp.poly, xIdPoly)
 		ppl_conv = [PolyPiece(p, xLimits[i:i+2]) for i,p in enumerate(convPolys)]
 		return PolyPieceFunc(ppl_conv)
 
@@ -592,7 +592,7 @@ class PolyPieceFunc:
 		return intVal
 
 
-	def conv(self, fpp):
+	def conv(self, fpp, xName='x'):
 		'''compute convolution int(-inf,inf) f(t)g(x-t)dt
 
 		   >>> pdf0 = PolyPieceFunc(PolyPiece(1,[0,1]))
@@ -630,7 +630,7 @@ class PolyPieceFunc:
 		fpp_conv = PolyPieceFunc()
 		for pp1 in self.polyPieces:
 			for pp2 in fpp.polyPieces:
-				fpp_conv += pp1.conv(pp2)
+				fpp_conv += pp1.conv(pp2, xName)
 		return fpp_conv
 
 

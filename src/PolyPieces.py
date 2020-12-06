@@ -105,8 +105,8 @@ class PolyPiece:
 	@staticmethod
 	def _convPolys(tIntervals, f, g, xIdPoly):
 		zName = max(f.varName, g.varName, xIdPoly.varName) + '0'
-		fz = Polynomial(f.coeffs, varName=zName)
-		x_z = Polynomial([xIdPoly,-1], varName=zName)
+		fz = Polynomial(f.coeffs, varName=zName) # "computes" f(z)
+		x_z = Polynomial([xIdPoly,-1], varName=zName) # computes the polynomial x-z
 		F = (fz*g(x_z)).intIndef(zName)
 		convPolys = [F(upper) - F(lower) for lower,upper in tIntervals]
 		return convPolys

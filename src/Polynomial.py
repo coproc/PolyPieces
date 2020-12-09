@@ -75,6 +75,21 @@ class Polynomial:
 
 	
 	@staticmethod
+	def _insertMultiplications(exprStr, varNames):
+		# get multiletter variable names out of the way
+		tempSubs = {n: '$%d$'%idx for idx,n in enumerate(varNames) if len(n) > 1}
+		for n,s in tempSubs.items():
+			exprStr = exprStr.replace(n, s)
+		# insert saved multiplication operators
+		for _ in range(2): # regular expressions for implicit multiplication may overlap
+			exprStr = re.sub(r'([a-zA-Z0-9)])[ \t]*([(a-zA-Z])', r'\1*\2', exprStr)
+		# get multiletter variable names back
+		for n,s in tempSubs.items():
+			exprStr = exprStr.replace(s, n)
+		return exprStr
+
+
+	@staticmethod
 	def fromString(exprStr, varNames=None):
 		'''create univariate polynomial from expression string
 		
@@ -95,16 +110,7 @@ class Polynomial:
 		if varNames is None:
 			varNames = set(re.findall('[a-zA-Z][0-9]*', exprStr))
 		exprStr = exprStr.replace('^', '**')
-		# get multiletter variable names out of the way
-		tempSubs = {n: '$%d$'%idx for idx,n in enumerate(varNames) if len(n) > 1}
-		for n,s in tempSubs.items():
-			exprStr = exprStr.replace(n, s)
-		# insert saved multiplication operators
-		for _ in range(2): # regular expressions for implicit multiplication may overlap
-			exprStr = re.sub(r'([a-zA-Z0-9)])[ \t]*([(a-zA-Z])', r'\1*\2', exprStr)
-		# get multiletter variable names back
-		for n,s in tempSubs.items():
-			exprStr = exprStr.replace(s, n)
+		exprStr = Polynomial._insertMultiplications(exprStr, varNames)
 		# assume exact arithmetic: division of integers is taken as Fraction;
 		exprStr = re.sub(r'([1-9][0-9]*)\s*/\s*([1-9][0-9]*)', r'Fraction(\1,\2)', exprStr)
 		p = eval(exprStr, None, {v: symbol(v) for v in varNames})

@@ -71,9 +71,15 @@ def isub(coeffs, coeffs2):
 		inormalize(coeffs)
 
 
-def scale(c, coeffs):
-	s = [c*coeff for coeff in coeffs]
-	return normalize(s)
+def scale(coeffs, s):
+	res = [s*coeff for coeff in coeffs]
+	return normalize(res)
+
+
+def iscale(coeffs, c):
+	for i in range(len(coeffs)):
+		coeffs[i] *= c
+	inormalize(coeffs)
 
 
 def multiply(coeffs1, coeffs2):

@@ -1,3 +1,4 @@
+import copy
 from numpy import array as na, array_equal as na_eq
 import unittest
 
@@ -29,11 +30,12 @@ TEST_CASES_BINARY = {
 	],
 	upo.add: [
 		([],	([], [])),
-		([],	([], [0])),
+		([1],	([1], [])),
+		([1],	([], [1])),
 		([5,7,3],	([1,2,3], [4,5])), # 3x^2 + 7x + 5 = (3x^2 + 2x + 1) + (5x + 4)
 		([2],	([1,1], [1,-1]))
 	],
-	upo.subtract: [
+	upo.sub: [
 		([],	([], [])),
 		([-1],	([], [1])),
 		([-3,-3, 3],	([1,2,3], [4,5])), #  3x^2 - 3x - 3 = (3x^2 + 2x + 1) - (5x + 4)
@@ -42,6 +44,7 @@ TEST_CASES_BINARY = {
 	],
 	upo.multiply: [
 		([], ([], [])),
+		([], ([1], [])),
 		([], ([], [1])),
 		([6], ([2], [3])),
 		([3,6], ([1,2], [3])),
@@ -51,14 +54,24 @@ TEST_CASES_BINARY = {
 		([-1,3,0,-3,-5,6], ([1,-3,2], [-1,0,2,3])) # 6x^5 - 5x^4 - 3x^3 + 3x - 1 = (2x^2 - 3x + 1)*(3x^3 + 2x^2 - 1)
 	],
 	upo.scale: [
-		([],	(0, [])),
-		([],	(0, [1])),
-		([2,1],	(1, [2,1])),
-		([1,-1],	(-1, [-1,1])),
-		([4,2,6],	(2, [2,1,3]))
+		([],	([], 0)),
+		([],	([1], 0)),
+		([2,1],	([2,1], 1)),
+		([1,-1],	([-1,1], -1)),
+		([4,2,6],	([2,1,3], 2))
 	]
 }
 
+INPLACE_UNARY_FUNCTIONS = {
+	upo.inormalize: upo.normalize,
+}
+
+INPLACE_BINARY_FUNCTIONS = {
+	upo.iadd:	upo.add,
+	upo.isub:	upo.sub,
+	upo.iscale:	upo.scale,
+}
+	
 class Univar_PolyOps(unittest.TestCase):
 
 	def test_unaryFunctions(self):
@@ -69,11 +82,35 @@ class Univar_PolyOps(unittest.TestCase):
 				print('.', end='')
 			print()
 
+	def test_unaryFunctions_inplaceVersions(self):
+		for funcInplace,func in INPLACE_UNARY_FUNCTIONS.items():
+			inOutData = TEST_CASES_UNARY[func]
+			print('testing univar_polyops.%s: ' % funcInplace.__name__, end='')
+			for output,input in inOutData:
+				inputModified = copy.deepcopy(input)
+				funcInplace(inputModified)
+				self.assertEqual(output, inputModified, 'testing %s <- %s(%s)' % (output,funcInplace.__name__,input))
+				print('.', end='')
+			print()
+
 	def test_binaryFunctions(self):
 		for func,inOutData in TEST_CASES_BINARY.items():
 			print('testing univar_polyops.%s: ' % func.__name__, end='')
 			for output,input in inOutData:
 				self.assertEqual(output, func(*input), 'testing %s = %s(%s, %s)' % (output,func.__name__,*input))
+				print('.', end='')
+			print()
+
+	def test_binaryFunctions_inplaceVersions(self):
+		for funcInplace,func in INPLACE_BINARY_FUNCTIONS.items():
+			inOutData = TEST_CASES_BINARY[func]
+			print('testing univar_polyops.%s: ' % funcInplace.__name__, end='')
+			for output,input in inOutData:
+				inputModified,input2 = input
+				inputModified = copy.deepcopy(inputModified)
+				funcInplace(inputModified, input2)
+				self.assertEqual(output, inputModified, 'testing %s <- %s(%s, %s)' %\
+					(output,funcInplace.__name__, inputModified, input2))
 				print('.', end='')
 			print()
 

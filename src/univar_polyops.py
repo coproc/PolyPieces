@@ -31,11 +31,9 @@ def normalize(coeffs):
 
 def evaluate(coeffs, x0):
 	"""evaluate polynomial represented by 'coeffs' at x = x0"""
-	x0_k = 1
 	p_x0 = 0
-	for c_k in coeffs:
-		p_x0 += c_k*x0_k
-		x0_k *= x0
+	for c_k in reversed(coeffs):
+		p_x0 = p_x0*x0 + c_k
 	return p_x0
 
 

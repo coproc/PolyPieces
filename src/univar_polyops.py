@@ -24,9 +24,15 @@ def degree(coeffs):
 
 
 def normalize(coeffs):
-	"""remove (zero) coefficients of monomials with power above degree"""
+	"""return input with (zero) coefficients of monomials with powers above degree removed"""
 	maxLen = degree(coeffs)+1
 	return coeffs[:maxLen] if maxLen < len(coeffs) else coeffs
+
+
+def inormalize(coeffs):
+	"""remove (zero) coefficients of monomials with power above degree from input"""
+	maxLen = degree(coeffs)+1
+	del coeffs[maxLen:]
 
 
 def evaluate(coeffs, x0):
@@ -42,9 +48,27 @@ def add(coeffs1, coeffs2):
 	return normalize(s)
 
 
-def subtract(coeffs1, coeffs2):
+def iadd(coeffs, coeffs2):
+	for i in range(min(len(coeffs), len(coeffs2))):
+		coeffs[i] += coeffs2[i]
+	if len(coeffs2) > len(coeffs):
+		coeffs += coeffs2[len(coeffs):]
+	else:
+		inormalize(coeffs)
+
+
+def sub(coeffs1, coeffs2):
 	s = [c1-c2 for c1,c2 in zip_longest(coeffs1, coeffs2, fillvalue=0)]
 	return normalize(s)
+
+
+def isub(coeffs, coeffs2):
+	for i in range(min(len(coeffs), len(coeffs2))):
+		coeffs[i] -= coeffs2[i]
+	if len(coeffs2) > len(coeffs):
+		coeffs += [-c for c in coeffs2[len(coeffs):]]
+	else:
+		inormalize(coeffs)
 
 
 def scale(c, coeffs):

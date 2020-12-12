@@ -393,13 +393,10 @@ class Polynomial:
 		coeffsMul = []
 		for i in range(len(self.coeffs) + len(coeffs) - 1):
 			ci = 0
-			for j in range(i+1):
-				if i-j >= len(coeffs): continue
-				if j   >= len(self.coeffs): break
+			for j in range(max(0, i-len(coeffs)+1), min(i+1, len(self.coeffs))):
 				ci += self.coeffs[j] * coeffs[i-j]
 			coeffsMul.append(ci)
 		return coeffsMul
-
 
 
 	def __pos__(self):

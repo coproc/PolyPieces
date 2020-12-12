@@ -361,10 +361,10 @@ class Polynomial:
 		   [4, 2]
 		   >>> p.scale(0)
 		   >>> p.coeffs
-		   [0]
+		   []
 		'''
 		if s == 0:
-			self.coeffs = [0]
+			self.coeffs = []
 		for i in range(len(self.coeffs)):
 			self.coeffs[i] *= s
 
@@ -388,8 +388,8 @@ class Polynomial:
 
 
 	def _mulCoeffs(self, coeffs):
-		if self.coeffs == [0] or coeffs == [0]:
-			return [0]
+		if self.coeffs == [] or coeffs == []:
+			return []
 		coeffsMul = []
 		for i in range(len(self.coeffs) + len(coeffs) - 1):
 			ci = 0

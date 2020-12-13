@@ -76,17 +76,27 @@ def scale(coeffs, s):
 	return normalize(res)
 
 
-def iscale(coeffs, c):
+def iscale(coeffs, s):
 	for i in range(len(coeffs)):
-		coeffs[i] *= c
+		coeffs[i] *= s
 	inormalize(coeffs)
 
 
 def multiply(coeffs1, coeffs2):
+	coeffsMul = []
+	for i in range(len(coeffs1) + len(coeffs2) - 1):
+		ci = 0
+		for j in range(max(0, i-len(coeffs2)+1), min(i+1, len(coeffs1))):
+			ci += coeffs1[j] * coeffs2[i-j]
+		coeffsMul.append(ci)
+	return coeffsMul
+
+
+# more compact/elegant, but slower
+def multiply_v2(coeffs1, coeffs2):
 	deg1,deg2 = degree(coeffs1), degree(coeffs2)
 	_scal_prod = lambda v1,v2: sum(c1*c2 for c1,c2 in zip(v1,v2))
 	return [_scal_prod(
 		islice     (coeffs1, max(0, deg-deg2), min(deg1, deg)+1),
 		_rev_islice(coeffs2, min(deg2, deg), max(0, deg-deg1)-1))
 		for deg in range(deg1+deg2+1)]
-

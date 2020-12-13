@@ -62,6 +62,8 @@ TEST_CASES_BINARY = {
 	]
 }
 
+TEST_CASES_BINARY[upo.multiply_v2] = TEST_CASES_BINARY[upo.multiply]
+
 INPLACE_UNARY_FUNCTIONS = {
 	upo.inormalize: upo.normalize,
 }

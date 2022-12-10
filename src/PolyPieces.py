@@ -1,9 +1,9 @@
 '''piecewise polynomial functions
 '''
-import sys
 import numbers
 from fractions import Fraction
 from Polynomial import Polynomial
+import sys
 
 
 def _newVarName(usedVarNames, baseName='t'):
@@ -371,8 +371,13 @@ class PolyPieceFunc:
 			scaleFacIntv = 1/k
 		fppComp = PolyPieceFunc()
 		for pp in self.polyPieces:
-			a,b = pp.interval
-			fppComp.polyPieces.append(PolyPiece(pp.poly(p), [(a-d)*scaleFacIntv,(b-d)*scaleFacIntv]))
+			aComp,bComp = [(border-d)*scaleFacIntv for border in pp.interval]
+			if k < 0:
+				aComp,bComp = bComp, aComp
+			ppComp = PolyPiece(pp.poly(p), [aComp, bComp])
+			fppComp.polyPieces.append(ppComp)
+		if k < 0:
+			fppComp.polyPieces.reverse()
 			
 		return fppComp
 

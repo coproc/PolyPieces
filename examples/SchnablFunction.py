@@ -11,7 +11,9 @@ function with surprising and rare properties:
    - its derivative consists of two copies of itself
 '''
 from pathlib import Path
-SRC_DIR = Path(__file__).parent.parent / 'src'
+print(__file__)
+SRC_DIR = Path(__file__).resolve().parent.parent / 'src'
+print(SRC_DIR)
 import sys
 sys.path.append(str(SRC_DIR.resolve()))
 
@@ -19,6 +21,7 @@ import math
 from fractions import Fraction
 from PolyPieces import PolyPiece, PolyPieceFunc
 import TextPlot
+from Polynomial import poly
 
 
 # m_h is a piecewise constant function (1/(2*h) for |x| < h,  0 otherwise)
@@ -54,6 +57,6 @@ if __name__ == '__main__':
 		m_d = m_d.der() 
 		derFuncs.append(m_d)
 		print(TextPlot.plotFpp(m_d))
-
+    
 	#for f in derFuncs:
 	#	print(f)

@@ -678,11 +678,11 @@ class PolyPieceFunc:
 
 	def __str__(self):
 		if not self.polyPieces:
-			return 'f(x) = 0'
+			return 'x |-> 0'
 		pieceReprs = [str(pp) for pp in self.polyPieces]
 		pieceReprs = PolyPieceFunc._align('x in', pieceReprs)
 		indent = '  '
-		return 'f(x) =\n' + indent + ('\n'+indent).join(pieceReprs) + '\n' + indent + '0, else'
+		return 'x |->\n' + indent + ('\n'+indent).join(pieceReprs) + '\n' + indent + '0, else'
 
 
 if __name__ == "__main__":

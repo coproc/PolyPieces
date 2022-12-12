@@ -24,39 +24,68 @@ import TextPlot
 from Polynomial import poly
 
 
-# m_h is a piecewise constant function (1/(2*h) for |x| < h,  0 otherwise)
-# m_h is non-negative, symmetric and the area under it is 1.
-# We do exact computations by using coefficients of type fractions.Fraction.
-def m_h(h):
-	return PolyPieceFunc(PolyPiece(Fraction(1,2*h), [-h,h]))
+# r_w is an even rectangular function of width w with area 1 under its curve
+# We try to do exact computations by using coefficients of type fractions.Fraction.
+def r_w(w):
+	if isinstance(w, int):
+		w = Fraction(w)
+	return PolyPieceFunc(PolyPiece(1/w, [-w/2,w/2]))
 
 
-# m_n is the convolution of the functions m_1, m_(1/2), ... m_(1/2^n)
-def m_n(n, showIntermediateResults=False):
-	m_i = m_h(1)
+# s_n is the convolution of the functions r_1, r_(1/2), ... r_(1/2^n)
+def s_n(n, showIntermediateResults=False):
+	s_i = r_w(1)
 	_2i = 1 # powers of 2
 	for _ in range(n):
 		if showIntermediateResults: print(m_i)
 		_2i *= 2
-		m_i = m_i ^ m_h(Fraction(1,_2i))
-	return m_i
+		s_i = s_i ^ r_w(Fraction(1,_2i))
+	return s_i
+
+
+def s_n_series(n:int):
+	series = [r_w(1)]
+	_2i = 1 # powers of 2
+	for _ in range(n):
+		_2i *= 2
+		series.append(series[-1] ^ r_w(Fraction(1,_2i)))
+	return series
 
 
 if __name__ == '__main__':
 	TextPlot.adjustConsoleEncodingForUnicode()
 
-	# since the series of functions is converging quickly, m_6 is already very close to the limit function.
-	m_6 = m_n(6, True)
-	print(m_6)
-	print(TextPlot.plotFpp(m_6))
+	# since the series of functions is converging quickly, s_6 is already very close to the limit function.
+	k = 6
+	s_k1,s_k = s_n_series(k)[-2:]
+	print(s_k1)
+	print(s_k)
+	
+	# these 3 functions are all equal
+	print(s_k.der())
+	print(s_k1.der() ^ r_w(Fraction(1,2**k)))
+	s_k1_delta = 2**k*(s_k1(poly('x+1/2**%d' % (k+1))) - s_k1(poly('x-1/2**%d' % (k+1))))
+	print(s_k1_delta)
+	
+	# so this function is identical to zero
+	print(s_k.der() - s_k1_delta)
+
+	# this function is equal to s_k.der() for x < 0
+	print(2*s_k1(poly('2x+1')))
+
+	# this function is equal to s_k.der() for x > 0
+	print(-2*s_k1(poly('2x-1')))
+
+	#print(TextPlot.plotFpp(s_k.der()))
+	#print(TextPlot.plotFpp(s_k1_delta))
 
 	# derivates show a fractal structure
-	m_d = m_6
+	ds_k = s_k
 	derFuncs = []
 	for i in range(3):
-		m_d = m_d.der() 
-		derFuncs.append(m_d)
-		print(TextPlot.plotFpp(m_d))
+		derFuncs.append(ds_k)
+		print(TextPlot.plotFpp(ds_k))
+		ds_k = ds_k.der() 
     
 	#for f in derFuncs:
 	#	print(f)
